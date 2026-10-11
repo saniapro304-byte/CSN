@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSN (Counter-Strike Nexus)</title>
+    <style>
+        /* === ОБЩИЕ СТИЛИ === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Arial', 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #0a0a0a;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            display: block;
+        }
+
+        /* === HUD (стиль CS2) === */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            font-weight: bold;
+        }
+        /* Здоровье и броня */
+        .health-armor {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 28px;
+            color: #e0e0e0;
+            background: rgba(20,20,20,0.6);
+            padding: 8px 18px;
+            border-radius: 6px;
+            border-left: 4px solid #ff8c00;
+        }
+        .stat-item .icon {
+            font-size: 30px;
+            filter: drop-shadow(0 0 5px rgba(255,140,0,0.5));
+        }
+        /* Патроны */
+        .ammo {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 42px;
+            color: #ffaa00;
+            background: rgba(20,20,20,0.7);
+            padding: 10px 28px;
+            border-radius: 8px;
+            border-right: 5px solid #ff8c00;
+            letter-spacing: 4px;
+            display: flex;
+            align-items: baseline;
+        }
+        .ammo .current {
+            font-size: 56px;
+            color: #fff;
+        }
+        .ammo .sep {
+            margin: 0 5px;
+            color: #888;
+        }
+        .ammo .max {
+            font-size: 32px;
+            color: #aaa;
+        }
+        /* Счёт, волна, таймер */
+        .top-info {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            background: rgba(10,10,10,0.7);
+            padding: 10px 40px;
+            border-radius: 12px;
+            border-bottom: 3px solid #ff8c00;
+            font-size: 22px;
+            color: #ddd;
+            backdrop-filter: blur(4px);
+        }
+        .top-info span {
+            color: #ffaa00;
+            margin-left: 8px;
+        }
+        /* Прицел */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            pointer-events: none;
+        }
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: #ff8c00;
+            box-shadow: 0 0 8px rgba(255,140,0,0.8);
+        }
+        .crosshair::before {
+            width: 4px;
+            height: 24px;
+            left: 10px;
+            top: 0;
+        }
+        .crosshair::after {
+            width: 24px;
+            height: 4px;
+            left: 0;
+            top: 10px;
+        }
+        /* Индикатор бомбовой точки */
+        #bomb-indicator {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff3300;
+            font-size: 32px;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255,50,0,0.9);
+            background: rgba(0,0,0,0.5);
+            padding: 8px 30px;
+            border-radius: 8px;
+            border: 2px solid #ff3300;
+            display: none;
+            letter-spacing: 2px;
+        }
+        /* Мини-карта */
+        #minimap {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 180px;
+            height: 180px;
+            background: rgba(10,10,10,0.8);
+            border: 2px solid #ff8c00;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #minimap canvas {
+            width: 100%;
+            height: 100%;
+        }
+        /* FPS */
+        #fps {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            color: #0f0;
+            font-size: 16px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        /* === ЭКРАНЫ === */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5,5,5,0.92);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            color: #fff;
+            text-align: center;
+        }
+        .screen.hidden {
+            display: none;
+        }
+        .logo {
+            font-size: 120px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: #ff8c00;
+            text-shadow: 0 0 40px rgba(255,140,0,0.6), 0 0 80px rgba(255,80,0,0.3);
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+        .subtitle {
+            font-size: 24px;
+            letter-spacing: 10px;
+            color: #ccaa88;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+        }
+        .btn {
+            pointer-events: auto;
+            background: transparent;
+            color: #ff8c00;
+            border: 2px solid #ff8c00;
+            padding: 16px 60px;
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            margin: 10px;
+            text-transform: uppercase;
+        }
+        .btn:hover {
+            background: #ff8c00;
+            color: #000;
+            box-shadow: 0 0 30px rgba(255,140,0,0.7);
+        }
+        .controls-info {
+            margin-top: 40px;
+            font-size: 18px;
+            color: #aaa;
+            line-height: 2;
+            background: rgba(20,20,20,0.6);
+            padding: 20px 50px;
+            border-radius: 10px;
+            border-left: 4px solid #ff8c00;
+            text-align: left;
+        }
+        .controls-info b {
+            color: #ffaa00;
+        }
+        .stats {
+            font-size: 24px;
+            line-height: 2.2;
+            color: #ddd;
+            margin: 30px 0;
+        }
+        .stats span {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        .gameover-title {
+            font-size: 80px;
+            color: #ff3300;
+            text-shadow: 0 0 40px rgba(255,50,0,0.8);
+            margin-bottom: 20px;
+        }
+        .victory-title {
+            font-size: 80px;
+            color: #ffaa00;
+            text-shadow: 0 0 40px rgba(255,170,0,0.8);
+            margin-bottom: 20px;
+        }
+
+        /* Временное сообщение */
+        #message {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffaa00;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255,170,0,0.8);
+            background: rgba(0,0,0,0.6);
+            padding: 12px 40px;
+            border-radius: 10px;
+            border: 2px solid #ff8c00;
+            display: none;
+            z-index: 50;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <!-- HUD -->
+    <div id="hud">
+        <div class="top-info">
+            <div>СЧЁТ: <span id="score">0</span></div>
+            <div>ВОЛНА: <span id="wave">1</span></div>
+            <div>ВРЕМЯ: <span id="timer">120</span></div>
+        </div>
+        <div class="health-armor">
+            <div class="stat-item"><span class="icon">❤️</span> <span id="health">100</span></div>
+            <div class="stat-item"><span class="icon">🛡️</span> <span id="armor">100</span></div>
+        </div>
+        <div class="ammo">
+            <span class="current" id="ammo-current">30</span>
+            <span class="sep">/</span>
+            <span class="max" id="ammo-max">30</span>
+        </div>
+        <div class="crosshair"></div>
+        <div id="bomb-indicator">ЗАХВАТ ТОЧКИ...</div>
+        <div id="minimap"><canvas id="minimap-canvas" width="180" height="180"></canvas></div>
+        <div id="fps">FPS: 60</div>
+        <div id="message"></div>
+    </div>
+
+    <!-- Стартовый экран -->
+    <div id="start-screen" class="screen">
+        <div class="logo">CSN</div>
+        <div class="subtitle">Counter-Strike Nexus</div>
+        <button class="btn" id="play-btn">ИГРАТЬ</button>
+        <div class="controls-info">
+            <b>WASD</b> — движение &nbsp; | &nbsp; <b>МЫШЬ</b> — обзор &nbsp; | &nbsp; <b>ЛКМ</b> — стрельба<br>
+            <b>ПКМ</b> — прицел &nbsp; | &nbsp; <b>R</b> — перезарядка &nbsp; | &nbsp; <b>1/2/3</b> — оружие<br>
+            <b>SHIFT</b> — бег &nbsp; | &nbsp; <b>CTRL</b> — присесть &nbsp; | &nbsp; <b>ПРОБЕЛ</b> — прыжок &nbsp; | &nbsp; <b>ESC</b> — пауза
+        </div>
+    </div>
+
+    <!-- Экран паузы -->
+    <div id="pause-screen" class="screen hidden">
+        <div style="font-size:70px; color:#ff8c00; margin-bottom:40px;">ПАУЗА</div>
+        <button class="btn" id="resume-btn">ПРОДОЛЖИТЬ</button>
+        <button class="btn" id="menu-btn">В МЕНЮ</button>
+    </div>
+
+    <!-- Экран Game Over -->
+    <div id="gameover-screen" class="screen hidden">
+        <div class="gameover-title">ВЫ ПОГИБЛИ</div>
+        <div class="stats">
+            Убийств: <span id="go-kills">0</span><br>
+            Волна: <span id="go-wave">0</span><br>
+            Время: <span id="go-time">0</span> сек
+        </div>
+        <button class="btn" id="restart-btn">ЗАНОВО</button>
+    </div>
+
+    <!-- Экран победы -->
+    <div id="victory-screen" class="screen hidden">
+        <div class="victory-title">ТОЧКА ЗАХВАЧЕНА!</div>
+        <div class="stats">
+            Убийств: <span id="v-kills">0</span><br>
+            Волна: <span id="v-wave">0</span><br>
+            Время: <span id="v-time">0</span> сек
+        </div>
+        <button class="btn" id="next-round-btn">СЛЕДУЮЩИЙ РАУНД</button>
+    </div>
+</div>
+
+<!-- Подключение Three.js через CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // ============================================================
+    // CSN (Counter-Strike Nexus) — тактический шутер
+    // ============================================================
+
+    // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
+    let scene, camera, renderer;
+    let game; // экземпляр класса Game
+
+    // === КЛАСС ИГРОКА ===
+    class Player {
+        constructor() {
+            this.health = 100;
+            this.armor = 100;
+            this.score = 0;
+            this.kills = 0;
+            this.position = new THREE.Vector3(0, 1.7, 5);
+            this.velocity = new THREE.Vector3();
+            this.onGround = true;
+            this.height = 1.7;
+            this.crouchHeight = 1.2;
+            this.isCrouching = false;
+            this.speed = 6.0;
+            this.sprintMultiplier = 1.8;
+            this.jumpForce = 7.0;
+            this.gravity = 20.0;
+            this.weapons = [];
+            this.currentWeaponIndex = 0;
+            this.bombZoneProgress = 0; // прогресс захвата точки
+            this.inBombZone = false;
+            this.bombZoneType = null;
+        }
+
+        get currentWeapon() {
+            return this.weapons[this.currentWeaponIndex];
+        }
+
+        update(delta) {
+            // Гравитация и прыжок обрабатываются в Game
+        }
+    }
+
+    // === КЛАСС ОРУЖИЯ ===
+    class Weapon {
+        constructor(name, damage, fireRate, magazineSize, reserveAmmo, reloadTime, spread, automatic, range = 100) {
+            this.name = name;
+            this.damage = damage;
+            this.fireRate = fireRate; // выстрелов в секунду
+            this.magazineSize = magazineSize;
+            this.maxMagazine = magazineSize;
+            this.reserveAmmo = reserveAmmo;
+            this.maxReserve = reserveAmmo;
+            this.reloadTime = reloadTime;
+            this.spread = spread;
+            this.automatic = automatic;
+            this.range = range;
+            this.lastShotTime = 0;
+            this.isReloading = false;
+            this.reloadStartTime = 0;
+        }
+
+        canShoot(currentTime) {
+            if (this.isReloading) return false;
+            if (this.magazineSize <= 0) return false;
+            return (currentTime - this.lastShotTime) >= (1 / this.fireRate);
+        }
+
+        shoot(currentTime) {
+            if (!this.canShoot(currentTime)) return false;
+            this.lastShotTime = currentTime;
+            this.magazineSize--;
+            return true;
+        }
+
+        startReload(currentTime) {
+            if (this.isReloading) return;
+            if (this.magazineSize === this.maxMagazine) return;
+            if (this.reserveAmmo <= 0) return;
+            this.isReloading = true;
+            this.reloadStartTime = currentTime;
+        }
+
+        updateReload(currentTime) {
+            if (!this.isReloading) return;
+            if (currentTime - this.reloadStartTime >= this.reloadTime) {
+                const needed = this.maxMagazine - this.magazineSize;
+                const available = Math.min(needed, this.reserveAmmo);
+                this.magazineSize += available;
+                this.reserveAmmo -= available;
+                this.isReloading = false;
+            }
+        }
+
+        get reloadProgress() {
+            if (!this.isReloading) return 1;
+            return Math.min(1, (performance.now() / 1000 - this.reloadStartTime) / this.reloadTime);
+        }
+    }
+
+    // === КЛАСС ВРАГА ===
+    class Enemy {
+        constructor(position, wave) {
+            this.health = 100;
+            this.maxHealth = 100;
+            this.position = position.clone();
+            this.velocity = new THREE.Vector3();
+            this.speed = 2.0 + wave * 0.3;
+            this.damage = 8 + wave * 1.5;
+            this.attackCooldown = 1.5 - wave * 0.05; // секунды между атаками
+            this.attackTimer = 1.0 + Math.random() * 2.0;
+            this.alive = true;
+            this.headshotHeight = 1.4; // высота для хедшота
+            this.bodyRadius = 0.5;
+            this.height = 1.8;
+            this.mesh = null; // назначается при создании модели
+            this.deathTimer = 0;
+            this.isDying = false;
+        }
+
+        update(delta, playerPos, walls) {
+            if (!this.alive) return;
+
+            // Движение к игроку
+            const dir = new THREE.Vector3().subVectors(playerPos, this.position);
+            dir.y = 0;
+            const dist = dir.length();
+
+            if (dist > 1.5) {
+                dir.normalize();
+                // Простое избегание стен (отталкивание)
+                const moveX = dir.x * this.speed * delta;
+                const moveZ = dir.z * this.speed * delta;
+
+                // Проверка коллизий с стенами
+                const newPos = this.position.clone();
+                newPos.x += moveX;
+                newPos.z += moveZ;
+
+                let collides = false;
+                const enemyBox = new THREE.Box3().setFromCenterAndSize(
+                    new THREE.Vector3(newPos.x, newPos.y + 0.9, newPos.z),
+                    new THREE.Vector3(1.0, 1.8, 1.0)
+                );
+
+                for (let wall of walls) {
+                    if (wall.box.intersectsBox(enemyBox)) {
+                        collides = true;
+                        break;
+                    }
+                }
+
+                if (!collides) {
+                    this.position.x = newPos.x;
+                    this.position.z = newPos.z;
+                } else {
+                    // Попытка обойти: сдвиг вбок
+                    const sideDir = new THREE.Vector3(-dir.z, 0, dir.x);
+                    const sidePos = this.position.clone();
+                    sidePos.x += sideDir.x * this.speed * delta * 0.7;
+                    sidePos.z += sideDir.z * this.speed * delta * 0.7;
+                    const sideBox = new THREE.Box3().setFromCenterAndSize(
+                        new THREE.Vector3(sidePos.x, sidePos.y + 0.9, sidePos.z),
+                        new THREE.Vector3(1.0, 1.8, 1.0)
+                    );
+                    let sideCollides = false;
+                    for (let wall of walls) {
+                        if (wall.box.intersectsBox(sideBox)) {
+                            sideCollides = true;
+                            break;
+                        }
+                    }
+                    if (!sideCollides) {
+                        this.position.x = sidePos.x;
+                        this.position.z = sidePos.z;
+                    }
+                }
+            }
+
+            // Атака игрока
+            if (dist < 2.5) {
+                this.attackTimer -= delta;
+                if (this.attackTimer <= 0) {
+                    this.attackTimer = this.attackCooldown;
+                    // Наносим урон
+                    if (game && game.player) {
+                        game.damagePlayer(this.damage);
+                    }
+                }
+            } else {
+                this.attackTimer = Math.max(this.attackTimer, 0.5);
+            }
+        }
+    }
+
+    // === КЛАСС ПУЛИ ===
+    class Bullet {
+        constructor(origin, direction, damage, owner = 'player') {
+            this.origin = origin.clone();
+            this.direction = direction.clone().normalize();
+            this.damage = damage;
+            this.owner = owner;
+            this.alive = true;
+            this.speed = 150;
+            this.maxDistance = 100;
+            this.distanceTraveled = 0;
+            this.previousPosition = origin.clone();
+            this.line = null;
+        }
+    }
+
+    // === КЛАСС КАРТЫ ===
+    class GameMap {
+        constructor() {
+            this.walls = []; // { mesh, box }
+            this.floorSize = 60;
+            this.bombZones = [
+                { name: 'A', position: new THREE.Vector3(-15, 0.01, -15), radius: 4, mesh: null },
+                { name: 'B', position: new THREE.Vector3(18, 0.01, 12), radius: 4, mesh: null }
+            ];
+        }
+
+        build(scene) {
+            // Пол
+            const floorGeo = new THREE.PlaneGeometry(this.floorSize, this.floorSize);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0xc2a87a, roughness: 0.9, metalness: 0.1 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Сетка на полу (для красоты)
+            const gridHelper = new THREE.GridHelper(this.floorSize, 30, 0x8a7a5a, 0x8a7a5a);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+
+            // Стены (песочные боксы)
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xd4b882, roughness: 0.8 });
+
+            // Функция для создания стены
+            const addWall = (x, y, z, w, h, d) => {
+                const geo = new THREE.BoxGeometry(w, h, d);
+                const mesh = new THREE.Mesh(geo, wallMat);
+                mesh.position.set(x, y + h / 2, z);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                scene.add(mesh);
+                const box = new THREE.Box3().setFromObject(mesh);
+                this.walls.push({ mesh, box });
+            };
+
+            // Внешние стены (забор)
+            const perimeter = 28;
+            addWall(0, 0, -perimeter, 60, 4, 1); // север
+            addWall(0, 0, perimeter, 60, 4, 1);  // юг
+            addWall(-perimeter, 0, 0, 1, 4, 60); // запад
+            addWall(perimeter, 0, 0, 1, 4, 60);  // восток
+
+            // Внутренние стены — коридоры
+            addWall(-8, 0, -12, 2, 3, 12);
+            addWall(8, 0, -8, 2, 3, 16);
+            addWall(-12, 0, 8, 16, 3, 2);
+            addWall(12, 0, 12, 16, 3, 2);
+            addWall(0, 0, 0, 6, 2.5, 2);
+            addWall(-18, 0, -5, 2, 3, 10);
+            addWall(18, 0, -15, 2, 3, 12);
+            addWall(-20, 0, 18, 10, 3, 2);
+
+            // Ящики (коричневые)
+            const crateMat = new THREE.MeshStandardMaterial({ color: 0x8B5A2B, roughness: 0.9 });
+            const addCrate = (x, y, z, size = 1.5) => {
+                const geo = new THREE.BoxGeometry(size, size, size);
+                const mesh = new THREE.Mesh(geo, crateMat);
+                mesh.position.set(x, y + size / 2, z);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                scene.add(mesh);
+                const box = new THREE.Box3().setFromObject(mesh);
+                this.walls.push({ mesh, box });
+            };
+
+            // Группы ящиков
+            addCrate(-6, 0, -5, 1.8);
+            addCrate(-6, 1.8, -5, 1.8);
+            addCrate(-4.2, 0, -5, 1.8);
+            addCrate(10, 0, 5, 2.0);
+            addCrate(10, 2.0, 5, 2.0);
+            addCrate(8, 0, 8, 1.6);
+            addCrate(-15, 0, -20, 2.0);
+            addCrate(-13, 0, -20, 1.8);
+            addCrate(20, 0, -8, 1.8);
+            addCrate(20, 1.8, -8, 1.8);
+
+            // Бомбовые точки (зоны)
+            this.bombZones.forEach(zone => {
+                const circleGeo = new THREE.CircleGeometry(zone.radius, 32);
+                const circleMat = new THREE.MeshStandardMaterial({
+                    color: 0xff4400,
+                    transparent: true,
+                    opacity: 0.35,
+                    side: THREE.DoubleSide,
+                    emissive: 0x441100
+                });
+                const circle = new THREE.Mesh(circleGeo, circleMat);
+                circle.rotation.x = -Math.PI / 2;
+                circle.position.copy(zone.position);
+                circle.position.y = 0.02;
+                scene.add(circle);
+
+                // Маркер с буквой
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ff4400';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(zone.name, 32, 32);
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.position.set(zone.position.x, 2.5, zone.position.z);
+                sprite.scale.set(2, 2, 1);
+                scene.add(sprite);
+
+                zone.mesh = circle;
+            });
+
+            return this;
+        }
+    }
+
+    // === КЛАСС ИГРЫ ===
+    class Game {
+        constructor() {
+            this.player = new Player();
+            this.map = new GameMap();
+            this.enemies = [];
+            this.bullets = [];
+            this.walls = [];
+            this.wave = 1;
+            this.score = 0;
+            this.roundTime = 120; // секунд
+            this.timeLeft = this.roundTime;
+            this.state = 'menu'; // menu, playing, paused, gameover, victory
+            this.enemySpawnTimer = 0;
+            this.enemySpawnInterval = 3.0;
+            this.maxEnemies = 8;
+            this.keys = {};
+            this.mouseX = 0;
+            this.mouseY = 0;
+            this.isPointerLocked = false;
+            this.lastTime = performance.now() / 1000;
+            this.delta = 0;
+            this.fps = 60;
+            this.fpsCounter = 0;
+            this.fpsTimer = 0;
+            this.messageTimer = 0;
+            this.audioCtx = null;
+            this.bombCaptureTime = 0;
+            this.captureTarget = 10; // секунд для захвата
+            this.roundNumber = 1;
+
+            // Raycaster для стрельбы
+            this.raycaster = new THREE.Raycaster();
+
+            // Прицел
+            this.crosshairElement = document.querySelector('.crosshair');
+
+            // Ссылки на DOM
+            this.dom = {
+                health: document.getElementById('health'),
+                armor: document.getElementById('armor'),
+                score: document.getElementById('score'),
+                wave: document.getElementById('wave'),
+                timer: document.getElementById('timer'),
+                ammoCurrent: document.getElementById('ammo-current'),
+                ammoMax: document.getElementById('ammo-max'),
+                bombIndicator: document.getElementById('bomb-indicator'),
+                message: document.getElementById('message'),
+                fps: document.getElementById('fps'),
+                startScreen: document.getElementById('start-screen'),
+                pauseScreen: document.getElementById('pause-screen'),
+                gameoverScreen: document.getElementById('gameover-screen'),
+                victoryScreen: document.getElementById('victory-screen'),
+                goKills: document.getElementById('go-kills'),
+                goWave: document.getElementById('go-wave'),
+                goTime: document.getElementById('go-time'),
+                vKills: document.getElementById('v-kills'),
+                vWave: document.getElementById('v-wave'),
+                vTime: document.getElementById('v-time'),
+                minimapCanvas: document.getElementById('minimap-canvas')
+            };
+
+            this.minimapCtx = this.dom.minimapCanvas.getContext('2d');
+        }
+
+        // Инициализация Three.js
+        initThree() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // небо
+            scene.fog = new THREE.Fog(0xc2a87a, 20, 80);
+
+            // Градиентное небо (просто цвет + туман)
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.copy(this.player.position);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('game-container').prepend(renderer.domElement);
+
+            // Освещение
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+            sunLight.position.set(30, 40, 20);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 1;
+            sunLight.shadow.camera.far = 100;
+            sunLight.shadow.camera.left = -40;
+            sunLight.shadow.camera.right = 40;
+            sunLight.shadow.camera.top = 40;
+            sunLight.shadow.camera.bottom = -40;
+            scene.add(sunLight);
+
+            // Заполняющий свет
+            const fillLight = new THREE.DirectionalLight(0xaaccff, 0.4);
+            fillLight.position.set(-20, 10, -30);
+            scene.add(fillLight);
+
+            // Строим карту
+            this.map.build(scene);
+            this.walls = this.map.walls;
+
+            // Создаём оружие игрока
+            this.createWeapons();
+
+            // Создаём модель оружия на экране (вид от первого лица)
+            this.createViewModel();
+
+            // Подключаем аудио
+            this.initAudio();
+        }
+
+        createWeapons() {
+            // Пистолет Glock
+            const glock = new Weapon('Glock', 25, 6, 20, 999, 2.0, 0.02, false);
+            // Автомат AK-47
+            const ak47 = new Weapon('AK-47', 35, 10, 30, 90, 2.5, 0.04, true);
+            // Нож
+            const knife = new Weapon('Нож', 55, 2, 0, 0, 0, 0.1, false, 3);
+
+            this.player.weapons = [glock, ak47, knife];
+            this.player.currentWeaponIndex = 0;
+        }
+
+        createViewModel() {
+            // Простая модель оружия в углу экрана
+            const gunGroup = new THREE.Group();
+
+            // Основа
+            const bodyGeo = new THREE.BoxGeometry(0.15, 0.15, 0.5);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.set(0.3, -0.25, -0.6);
+            gunGroup.add(body);
+
+            // Ствол
+            const barrelGeo = new THREE.BoxGeometry(0.08, 0.08, 0.4);
+            const barrelMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
+            const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+            barrel.position.set(0.3, -0.22, -0.9);
+            gunGroup.add(barrel);
+
+            // Рукоятка
+            const gripGeo = new THREE.BoxGeometry(0.1, 0.2, 0.1);
+            const gripMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const grip = new THREE.Mesh(gripGeo, gripMat);
+            grip.position.set(0.3, -0.35, -0.5);
+            gunGroup.add(grip);
+
+            // Прицел
+            const sightGeo = new THREE.BoxGeometry(0.02, 0.03, 0.02);
+            const sightMat = new THREE.MeshStandardMaterial({ color: 0xff8c00 });
+            const sight = new THREE.Mesh(sightGeo, sightMat);
+            sight.position.set(0.3, -0.16, -0.85);
+            gunGroup.add(sight);
+
+            // Вспышка выстрела (изначально невидима)
+            const flashGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            const flashMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0 });
+            const flash = new THREE.Mesh(flashGeo, flashMat);
+            flash.position.set(0.3, -0.2, -1.1);
+            gunGroup.add(flash);
+
+            this.viewModel = gunGroup;
+            this.viewModelFlash = flash;
+            this.viewModelFlashTimer = 0;
+
+            camera.add(gunGroup);
+            scene.add(camera);
+        }
+
+        initAudio() {
+            try {
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.warn('Web Audio API не поддерживается');
+            }
+        }
+
+        playSound(type, param) {
+            if (!this.audioCtx) return;
+            if (this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+
+            const now = this.audioCtx.currentTime;
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(this.audioCtx.destination);
+
+            switch (type) {
+                case 'shoot':
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                    break;
+                case 'reload':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    break;
+                case 'hit':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                    break;
+                case 'death':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                    break;
+                case 'step':
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150 + Math.random() * 50, now);
+                    gain.gain.setValueAtTime(0.03, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                    break;
+                case 'capture':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    break;
+                case 'damage':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                    break;
+            }
+        }
+
+        // Запуск игры
+        start() {
+            this.state = 'playing';
+            this.player.health = 100;
+            this.player.armor = 100;
+            this.player.score = 0;
+            this.player.kills = 0;
+            this.player.position.set(0, 1.7, 5);
+            this.player.velocity.set(0, 0, 0);
+            this.player.bombZoneProgress = 0;
+            this.player.inBombZone = false;
+            this.wave = 1;
+            this.score = 0;
+            this.timeLeft = this.roundTime;
+            this.enemies.forEach(e => scene.remove(e.mesh));
+            this.enemies = [];
+            this.bullets = [];
+            this.enemySpawnTimer = 1.0;
+            this.maxEnemies = 6;
+            this.roundNumber = 1;
+            this.captureTarget = 10;
+            this.updateUI();
+
+            // Сброс оружия
+            this.player.weapons.forEach(w => {
+                w.magazineSize = w.maxMagazine;
+                w.reserveAmmo = w.maxReserve;
+                w.isReloading = false;
+            });
+            this.player.currentWeaponIndex = 0;
+
+            // Показать HUD
+            this.dom.startScreen.classList.add('hidden');
+            this.dom.pauseScreen.classList.add('hidden');
+            this.dom.gameoverScreen.classList.add('hidden');
+            this.dom.victoryScreen.classList.add('hidden');
+
+            // Запрос Pointer Lock
+            this.requestPointerLock();
+
+            // Сброс камеры
+            camera.position.copy(this.player.position);
+            camera.rotation.set(0, 0, 0);
+
+            // Спавн первой волны
+            this.spawnWave();
+
+            // Скрыть курсор
+            document.body.style.cursor = 'none';
+        }
+
+        requestPointerLock() {
+            renderer.domElement.requestPointerLock();
+        }
+
+        // Спавн волны врагов
+        spawnWave() {
+            const count = Math.min(4 + this.wave * 2, 12);
+            for (let i = 0; i < count; i++) {
+                this.spawnEnemy();
+            }
+            this.showMessage(`ВОЛНА ${this.wave}`);
+        }
+
+        spawnEnemy() {
+            if (this.enemies.length >= this.maxEnemies) return;
+
+            // Спавн в случайной точке по краям карты
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 20 + Math.random() * 8;
+            const x = Math.cos(angle) * dist;
+            const z = Math.sin(angle) * dist;
+
+            const enemy = new Enemy(new THREE.Vector3(x, 0, z), this.wave);
+
+            // Модель врага (красная капсула)
+            const geo = new THREE.CapsuleGeometry(0.5, 1.0, 4, 8);
+            const mat = new THREE.MeshStandardMaterial({ color: 0xcc2222, emissive: 0x330000 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(enemy.position);
+            mesh.position.y = 0.9;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            enemy.mesh = mesh;
+
+            // Добавляем "голову" (сфера сверху)
+            const headGeo = new THREE.SphereGeometry(0.35, 8, 8);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0x440000 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.set(0, 1.1, 0);
+            head.castShadow = true;
+            mesh.add(head);
+            enemy.headMesh = head;
+
+            this.enemies.push(enemy);
+        }
+
+        // Урон игроку
+        damagePlayer(amount) {
+            if (this.state !== 'playing') return;
+            let damage = amount;
+            if (this.player.armor > 0) {
+                const absorbed = Math.min(this.player.armor, damage * 0.5);
+                this.player.armor -= absorbed;
+                damage -= absorbed;
+            }
+            this.player.health -= damage;
+            this.playSound('damage');
+            this.updateUI();
+
+            if (this.player.health <= 0) {
+                this.player.health = 0;
+                this.gameOver();
+            }
+        }
+
+        // Урон врагу
+        damageEnemy(enemy, damage, isHeadshot = false) {
+            if (!enemy.alive) return;
+            const actualDamage = isHeadshot ? 999 : damage;
+            enemy.health -= actualDamage;
+
+            if (enemy.health <= 0) {
+                enemy.alive = false;
+                enemy.isDying = true;
+                enemy.deathTimer = 0.5;
+                this.player.kills++;
+                this.score += 100;
+                this.playSound('death');
+
+                // Удаление модели
+                if (enemy.mesh) {
+                    scene.remove(enemy.mesh);
+                }
+
+                // Удаление из массива
+                const idx = this.enemies.indexOf(enemy);
+                if (idx !== -1) {
+                    this.enemies.splice(idx, 1);
+                }
+
+                this.updateUI();
+            } else {
+                this.playSound('hit');
+                // Вспышка при попадании
+                if (enemy.mesh) {
+                    enemy.mesh.material.emissive.setHex(0x660000);
+                    setTimeout(() => {
+                        if (enemy.mesh) enemy.mesh.material.emissive.setHex(0x330000);
+                    }, 100);
+                }
+            }
+        }
+
+        // Выстрел
+        shoot() {
+            if (this.state !== 'playing') return;
+            const weapon = this.player.currentWeapon;
+            if (!weapon) return;
+
+            const now = performance.now() / 1000;
+            if (weapon.isReloading) return;
+
+            if (weapon.name === 'Нож') {
+                // Атака ножом — raycast вблизи
+                this.meleeAttack();
+                return;
+            }
+
+            if (!weapon.shoot(now)) {
+                if (weapon.magazineSize <= 0) {
+                    weapon.startReload(now);
+                    this.playSound('reload');
+                }
+                return;
+            }
+
+            this.playSound('shoot');
+
+            // Вспышка
+            this.viewModelFlash.material.opacity = 0.9;
+            this.viewModelFlashTimer = 0.05;
+
+            // Отдача камеры
+            camera.rotation.x -= 0.02;
+            camera.rotation.y += (Math.random() - 0.5) * 0.01;
+
+            // Raycaster
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            // Разброс
+            direction.x += (Math.random() - 0.5) * weapon.spread * 2;
+            direction.y += (Math.random() - 0.5) * weapon.spread * 2;
+            direction.z += (Math.random() - 0.5) * weapon.spread * 2;
+            direction.normalize();
+
+            this.raycaster.set(camera.position, direction);
+            this.raycaster.far = weapon.range;
+
+            // Проверка попадания по врагам
+            let hitSomething = false;
+            const enemyMeshes = this.enemies.filter(e => e.alive && e.mesh).map(e => e.mesh);
+            const intersects = this.raycaster.intersectObjects(enemyMeshes, true);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                // Определяем врага по объекту
+                let enemy = null;
+                for (let e of this.enemies) {
+                    if (e.mesh === hit.object || (e.mesh && e.mesh.children.includes(hit.object))) {
+                        enemy = e;
+                        break;
+                    }
+                }
+                if (enemy) {
+                    // Проверка на хедшот (верхняя часть)
+                    const hitPoint = hit.point;
+                    const enemyPos = enemy.position;
+                    const heightAbove = hitPoint.y - enemyPos.y;
+                    const isHeadshot = heightAbove > enemy.headshotHeight;
+                    this.damageEnemy(enemy, weapon.damage, isHeadshot);
+                    hitSomething = true;
+                }
+            }
+
+            // Проверка попадания по стенам (для визуального эффекта)
+            if (!hitSomething) {
+                const wallMeshes = this.walls.map(w => w.mesh);
+                const wallHits = this.raycaster.intersectObjects(wallMeshes, false);
+                if (wallHits.length > 0) {
+                    // Можно добавить искры, но пропустим
+                }
+            }
+
+            this.updateUI();
+        }
+
+        meleeAttack() {
+            const now = performance.now() / 1000;
+            const weapon = this.player.currentWeapon;
+            if (now - weapon.lastShotTime < 0.4) return;
+            weapon.lastShotTime = now;
+            this.playSound('shoot');
+
+            // Проверка врагов вблизи
+            const playerPos = camera.position;
+            for (let enemy of this.enemies) {
+                if (!enemy.alive) continue;
+                const dist = playerPos.distanceTo(enemy.position);
+                if (dist < 2.5) {
+                    // Проверка направления
+                    const dirToEnemy = new THREE.Vector3().subVectors(enemy.position, playerPos).normalize();
+                    const lookDir = new THREE.Vector3();
+                    camera.getWorldDirection(lookDir);
+                    const dot = dirToEnemy.dot(lookDir);
+                    if (dot > 0.5) {
+                        this.damageEnemy(enemy, weapon.damage);
+                    }
+                }
+            }
+        }
+
+        // Перезарядка
+        reload() {
+            const weapon = this.player.currentWeapon;
+            if (!weapon) return;
+            if (weapon.name === 'Нож') return;
+            if (weapon.isReloading) return;
+            if (weapon.magazineSize === weapon.maxMagazine) return;
+            if (weapon.reserveAmmo <= 0) return;
+            weapon.startReload(performance.now() / 1000);
+            this.playSound('reload');
+        }
+
+        // Переключение оружия
+        switchWeapon(index) {
+            if (index < 0 || index >= this.player.weapons.length) return;
+            if (index === this.player.currentWeaponIndex) return;
+            this.player.currentWeaponIndex = index;
+            this.player.currentWeapon.isReloading = false;
+            this.updateUI();
+        }
+
+        // Обновление таймера и спавна
+        updateGame(delta) {
+            if (this.state !== 'playing') return;
+
+            // Таймер раунда
+            this.timeLeft -= delta;
+            if (this.timeLeft <= 0) {
+                this.timeLeft = 0;
+                this.gameOver();
+                return;
+            }
+
+            // Спавн врагов
+            this.enemySpawnTimer -= delta;
+            if (this.enemySpawnTimer <= 0 && this.enemies.length < this.maxEnemies) {
+                this.spawnEnemy();
+                this.enemySpawnTimer = Math.max(1.0, 3.0 - this.wave * 0.2);
+            }
+
+            // Обновление врагов
+            for (let i = this.enemies.length - 1; i >= 0; i--) {
+                const enemy = this.enemies[i];
+                enemy.update(delta, this.player.position, this.walls);
+                if (enemy.mesh) {
+                    enemy.mesh.position.copy(enemy.position);
+                    enemy.mesh.position.y = 0.9;
+                }
+            }
+
+            // Проверка бомбовых зон
+            let inZone = false;
+            let zoneType = null;
+            for (let zone of this.map.bombZones) {
+                const dist = this.player.position.distanceTo(zone.position);
+                if (dist < zone.radius) {
+                    inZone = true;
+                    zoneType = zone.name;
+                    break;
+                }
+            }
+
+            if (inZone) {
+                this.player.bombZoneProgress += delta;
+                this.player.inBombZone = true;
+                this.player.bombZoneType = zoneType;
+                this.dom.bombIndicator.style.display = 'block';
+                this.dom.bombIndicator.textContent = `ЗАХВАТ ТОЧКИ ${zoneType}... ${Math.floor(this.player.bombZoneProgress)}/${this.captureTarget}`;
+
+                // Звук захвата каждую секунду
+                if (Math.floor(this.player.bombZoneProgress) > Math.floor(this.player.bombZoneProgress - delta)) {
+                    this.playSound('capture');
+                }
+
+                // Проверка победы
+                if (this.player.bombZoneProgress >= this.captureTarget) {
+                    this.victory();
+                }
+            } else {
+                this.player.bombZoneProgress = 0;
+                this.player.inBombZone = false;
+                this.player.bombZoneType = null;
+                this.dom.bombIndicator.style.display = 'none';
+            }
+
+            // Обновление перезарядки
+            this.player.weapons.forEach(w => w.updateReload(performance.now() / 1000));
+
+            // Обновление вспышки
+            if (this.viewModelFlashTimer > 0) {
+                this.viewModelFlashTimer -= delta;
+                this.viewModelFlash.material.opacity = Math.max(0, this.viewModelFlashTimer / 0.05 * 0.9);
+            } else {
+                this.viewModelFlash.material.opacity = 0;
+            }
+
+            // Обновление HUD
+            this.updateUI();
+
+            // Обновление мини-карты
+            this.updateMinimap();
+        }
+
+        // Обновление UI
+        updateUI() {
+            this.dom.health.textContent = Math.max(0, Math.floor(this.player.health));
+            this.dom.armor.textContent = Math.max(0, Math.floor(this.player.armor));
+            this.dom.score.textContent = this.score;
+            this.dom.wave.textContent = this.wave;
+            this.dom.timer.textContent = Math.floor(this.timeLeft);
+
+            const weapon = this.player.currentWeapon;
+            if (weapon) {
+                if (weapon.name === 'Нож') {
+                    this.dom.ammoCurrent.textContent = '∞';
+                    this.dom.ammoMax.textContent = '∞';
+                } else {
+                    this.dom.ammoCurrent.textContent = weapon.magazineSize;
+                    this.dom.ammoMax.textContent = weapon.reserveAmmo;
+                }
+            }
+        }
+
+        // Обновление мини-карты
+        updateMinimap() {
+            const ctx = this.minimapCtx;
+            const w = 180, h = 180;
+            const scale = 3.0; // масштаб: 1 unit = 3 px
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Фон
+            ctx.fillStyle = 'rgba(20,20,20,0.9)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Центр карты
+            const cx = w / 2, cy = h / 2;
+
+            // Стены
+            ctx.fillStyle = '#8a7a5a';
+            for (let wall of this.walls) {
+                const box = wall.box;
+                const min = box.min;
+                const max = box.max;
+                const x1 = cx + min.x * scale / 2;
+                const y1 = cy + min.z * scale / 2;
+                const x2 = cx + max.x * scale / 2;
+                const y2 = cy + max.z * scale / 2;
+                ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+            }
+
+            // Бомбовые точки
+            for (let zone of this.map.bombZones) {
+                const zx = cx + zone.position.x * scale / 2;
+                const zy = cy + zone.position.z * scale / 2;
+                ctx.beginPath();
+                ctx.arc(zx, zy, zone.radius * scale / 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,68,0,0.4)';
+                ctx.fill();
+                ctx.strokeStyle = '#ff4400';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ff4400';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(zone.name, zx, zy);
+            }
+
+            // Игрок
+            const px = cx + this.player.position.x * scale / 2;
+            const py = cy + this.player.position.z * scale / 2;
+            ctx.beginPath();
+            ctx.arc(px, py, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ff00';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Враги
+            ctx.fillStyle = '#ff2222';
+            for (let enemy of this.enemies) {
+                if (!enemy.alive) continue;
+                const ex = cx + enemy.position.x * scale / 2;
+                const ey = cy + enemy.position.z * scale / 2;
+                ctx.beginPath();
+                ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Рамка
+            ctx.strokeStyle = '#ff8c00';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, w - 2, h - 2);
+        }
+
+        // Показ сообщения
+        showMessage(text, duration = 2) {
+            this.dom.message.textContent = text;
+            this.dom.message.style.display = 'block';
+            this.messageTimer = duration;
+        }
+
+        // Пауза
+        pause() {
+            if (this.state !== 'playing') return;
+            this.state = 'paused';
+            this.dom.pauseScreen.classList.remove('hidden');
+            document.exitPointerLock();
+            document.body.style.cursor = 'default';
+        }
+
+        resume() {
+            if (this.state !== 'paused') return;
+            this.state = 'playing';
+            this.dom.pauseScreen.classList.add('hidden');
+            this.requestPointerLock();
+            document.body.style.cursor = 'none';
+        }
+
+        // Game Over
+        gameOver() {
+            this.state = 'gameover';
+            this.dom.gameoverScreen.classList.remove('hidden');
+            this.dom.goKills.textContent = this.player.kills;
+            this.dom.goWave.textContent = this.wave;
+            this.dom.goTime.textContent = Math.floor(this.roundTime - this.timeLeft);
+            document.exitPointerLock();
+            document.body.style.cursor = 'default';
+        }
+
+        // Победа
+        victory() {
+            this.state = 'victory';
+            this.dom.victoryScreen.classList.remove('hidden');
+            this.dom.vKills.textContent = this.player.kills;
+            this.dom.vWave.textContent = this.wave;
+            this.dom.vTime.textContent = Math.floor(this.roundTime - this.timeLeft);
+            document.exitPointerLock();
+            document.body.style.cursor = 'default';
+        }
+
+        // Следующий раунд
+        nextRound() {
+            this.roundNumber++;
+            this.wave++;
+            this.timeLeft = this.roundTime;
+            this.captureTarget = Math.min(15, 8 + this.roundNumber * 2);
+            this.player.bombZoneProgress = 0;
+            this.maxEnemies = Math.min(12, 6 + this.roundNumber);
+            this.enemies.forEach(e => { if (e.mesh) scene.remove(e.mesh); });
+            this.enemies = [];
+            this.spawnWave();
+            this.state = 'playing';
+            this.dom.victoryScreen.classList.add('hidden');
+            this.requestPointerLock();
+            document.body.style.cursor = 'none';
+            this.updateUI();
+        }
+
+        // Основной игровой цикл
+        animate() {
+            requestAnimationFrame(() => this.animate());
+
+            const now = performance.now() / 1000;
+            this.delta = Math.min(0.05, now - this.lastTime);
+            this.lastTime = now;
+
+            // FPS
+            this.fpsCounter++;
+            this.fpsTimer += this.delta;
+            if (this.fpsTimer >= 0.5) {
+                this.fps = Math.round(this.fpsCounter / this.fpsTimer);
+                this.fpsCounter = 0;
+                this.fpsTimer = 0;
+                this.dom.fps.textContent = `FPS: ${this.fps}`;
+            }
+
+            // Обработка сообщений
+            if (this.messageTimer > 0) {
+                this.messageTimer -= this.delta;
+                if (this.messageTimer <= 0) {
+                    this.dom.message.style.display = 'none';
+                }
+            }
+
+            if (this.state === 'playing') {
+                // Обновление игры
+                this.updateGame(this.delta);
+
+                // Движение игрока
+                this.handlePlayerMovement(this.delta);
+
+                // Обновление камеры
+                camera.position.copy(this.player.position);
+                camera.position.y = this.player.isCrouching ? this.player.crouchHeight : this.player.height;
+
+                // Плавное покачивание камеры при ходьбе (упрощённо)
+                // ...
+
+                // Проверка выхода за пределы карты
+                const limit = this.map.floorSize / 2 - 1;
+                this.player.position.x = Math.max(-limit, Math.min(limit, this.player.position.x));
+                this.player.position.z = Math.max(-limit, Math.min(limit, this.player.position.z));
+            }
+
+            // Рендер
+            renderer.render(scene, camera);
+        }
+
+        // Обработка движения игрока
+        handlePlayerMovement(delta) {
+            const player = this.player;
+
+            // Скорость
+            let speed = player.speed;
+            if (this.keys['shift']) speed *= player.sprintMultiplier;
+            if (player.isCrouching) speed *= 0.5;
+
+            // Направление движения
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+            forward.y = 0;
+            forward.normalize();
+
+            const right = new THREE.Vector3();
+            right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+            const moveDir = new THREE.Vector3();
+            if (this.keys['w']) moveDir.add(forward);
+            if (this.keys['s']) moveDir.sub(forward);
+            if (this.keys['d']) moveDir.add(right);
+            if (this.keys['a']) moveDir.sub(right);
+
+            if (moveDir.length() > 0) {
+                moveDir.normalize();
+                // Проверка коллизий со стенами
+                const moveX = moveDir.x * speed * delta;
+                const moveZ = moveDir.z * speed * delta;
+
+                const newPos = player.position.clone();
+                newPos.x += moveX;
+                newPos.z += moveZ;
+
+                // Коллизия со стенами (простая проверка по Box3)
+                const playerBox = new THREE.Box3().setFromCenterAndSize(
+                    new THREE.Vector3(newPos.x, 0.9, newPos.z),
+                    new THREE.Vector3(0.8, 1.8, 0.8)
+                );
+
+                let collides = false;
+                for (let wall of this.walls) {
+                    if (wall.box.intersectsBox(playerBox)) {
+                        collides = true;
+                        break;
+                    }
+                }
+
+                if (!collides) {
+                    player.position.x = newPos.x;
+                    player.position.z = newPos.z;
+                }
+
+                // Звук шагов
+                if (Math.random() < 0.15) {
+                    this.playSound('step');
+                }
+            }
+
+            // Гравитация и прыжок
+            if (this.keys[' '] && player.onGround) {
+                player.velocity.y = player.jumpForce;
+                player.onGround = false;
+            }
+
+            player.velocity.y -= player.gravity * delta;
+            player.position.y += player.velocity.y * delta;
+
+            // Проверка приземления (пол на y=1.7)
+            const groundLevel = player.isCrouching ? player.crouchHeight : player.height;
+            if (player.position.y <= groundLevel) {
+                player.position.y = groundLevel;
+                player.velocity.y = 0;
+                player.onGround = true;
+            }
+        }
+
+        // Обработка resize
+        onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Обработка клавиш
+        onKeyDown(event) {
+            this.keys[event.key.toLowerCase()] = true;
+            if (event.key === ' ') this.keys[' '] = true;
+
+            // Присесть
+            if (event.key === 'Control') {
+                this.player.isCrouching = true;
+            }
+
+            // Перезарядка
+            if (event.key.toLowerCase() === 'r') {
+                this.reload();
+            }
+
+            // Смена оружия
+            if (event.key === '1') this.switchWeapon(0);
+            if (event.key === '2') this.switchWeapon(1);
+            if (event.key === '3') this.switchWeapon(2);
+
+            // Пауза
+            if (event.key === 'Escape') {
+                if (this.state === 'playing') {
+                    this.pause();
+                } else if (this.state === 'paused') {
+                    this.resume();
+                }
+            }
+        }
+
+        onKeyUp(event) {
+            this.keys[event.key.toLowerCase()] = false;
+            if (event.key === ' ') this.keys[' '] = false;
+            if (event.key === 'Control') {
+                this.player.isCrouching = false;
+            }
+        }
+
+        onMouseDown(event) {
+            if (this.state !== 'playing') return;
+            if (event.button === 0) {
+                // ЛКМ — стрельба
+                this.shoot();
+                // Автоматический огонь
+                if (this.player.currentWeapon && this.player.currentWeapon.automatic) {
+                    this.autoFire = true;
+                }
+            }
+            if (event.button === 2) {
+                // ПКМ — прицел (zoom)
+                camera.fov = 40;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        onMouseUp(event) {
+            if (event.button === 0) {
+                this.autoFire = false;
+            }
+            if (event.button === 2) {
+                camera.fov = 75;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        onMouseMove(event) {
+            if (this.state !== 'playing') return;
+            if (document.pointerLockElement !== renderer.domElement) return;
+
+            const sensitivity = 0.002;
+            camera.rotation.y -= event.movementX * sensitivity;
+            camera.rotation.x -= event.movementY * sensitivity;
+            camera.rotation.x = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, camera.rotation.x));
+        }
+    }
+
+    // === ЗАПУСК ===
+    window.addEventListener('load', () => {
+        game = new Game();
+        game.initThree();
+        game.animate();
+
+        // Обработчики событий
+        window.addEventListener('resize', () => game.onResize());
+        window.addEventListener('keydown', (e) => game.onKeyDown(e));
+        window.addEventListener('keyup', (e) => game.onKeyUp(e));
+        window.addEventListener('mousedown', (e) => game.onMouseDown(e));
+        window.addEventListener('mouseup', (e) => game.onMouseUp(e));
+        window.addEventListener('mousemove', (e) => game.onMouseMove(e));
+        window.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Автоматический огонь
+        setInterval(() => {
+            if (game && game.autoFire && game.state === 'playing') {
+                game.shoot();
+            }
+        }, 100);
+
+        // Кнопки меню
+        document.getElementById('play-btn').addEventListener('click', () => {
+            game.start();
+        });
+
+        document.getElementById('resume-btn').addEventListener('click', () => {
+            game.resume();
+        });
+
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            game.state = 'menu';
+            game.dom.pauseScreen.classList.add('hidden');
+            game.dom.startScreen.classList.remove('hidden');
+            document.body.style.cursor = 'default';
+            // Очистка
+            game.enemies.forEach(e => { if (e.mesh) scene.remove(e.mesh); });
+            game.enemies = [];
+            game.bullets = [];
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            game.start();
+        });
+
+        document.getElementById('next-round-btn').addEventListener('click', () => {
+            game.nextRound();
+        });
+
+        // Скрываем курсор при старте
+        renderer.domElement.addEventListener('click', () => {
+            if (game.state === 'playing') {
+                game.requestPointerLock();
+            }
+        });
+    });
+
+    // Обработка потери Pointer Lock
+    document.addEventListener('pointerlockchange', () => {
+        if (game && game.state === 'playing' && document.pointerLockElement !== renderer.domElement) {
+            game.pause();
+        }
+    });
+
+    // Экспорт для отладки
+    window.game = game;
+</script>
+</body>
+</html>
