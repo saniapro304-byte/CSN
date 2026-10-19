@@ -35,6 +35,82 @@ canvas { display: block; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
 /* ============================================================
+   ATMOSPHERE OVERLAYS (vignette + grain + blood)
+   ============================================================ */
+#fx-vignette {
+  position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.9) 100%);
+  mix-blend-mode: multiply;
+}
+#fx-grain {
+  position: fixed; inset: -50%; z-index: 31; pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/></svg>");
+  animation: grainShift 0.25s steps(4) infinite;
+}
+@keyframes grainShift {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-3%,2%); }
+  50% { transform: translate(2%,-4%); }
+  75% { transform: translate(-2%,-2%); }
+  100% { transform: translate(3%,3%); }
+}
+#fx-blood {
+  position: fixed; inset: 0; z-index: 32; pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(90,5,5,0.35) 0%, transparent 18%),
+    radial-gradient(circle at 92% 88%, rgba(90,5,5,0.3) 0%, transparent 20%),
+    radial-gradient(circle at 78% 8%, rgba(60,0,0,0.25) 0%, transparent 15%);
+  opacity: 0.7;
+  transition: opacity 2s ease;
+}
+#fx-blood.danger { opacity: 1; filter: hue-rotate(-10deg) brightness(1.3); }
+#fx-flash {
+  position: fixed; inset: 0; z-index: 33; pointer-events: none;
+  background: #fff; opacity: 0;
+  transition: opacity 0.08s ease;
+}
+#fx-flash.on { opacity: 0.85; }
+
+/* ============================================================
+   NIGHT INTRO ANIMATION
+   ============================================================ */
+#night-intro {
+  position: fixed; inset: 0; z-index: 88;
+  background: #000; display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px; text-align: center; padding: 24px;
+}
+#night-intro.show { display: flex; }
+#night-intro .night-label {
+  font-size: clamp(10px, 1.6vw, 13px); letter-spacing: .8em;
+  color: var(--text-dim); text-transform: uppercase;
+  opacity: 0; animation: fadeInUp 1.2s ease forwards;
+}
+#night-intro .night-num {
+  font-size: clamp(60px, 14vw, 140px); font-weight: 900;
+  letter-spacing: .15em; color: var(--accent-bright);
+  text-shadow: 0 0 40px rgba(201,48,48,.7), 0 0 80px rgba(201,48,48,.3);
+  opacity: 0; animation: nightPulse 2.4s ease forwards 0.5s;
+  font-family: 'Courier New', monospace;
+}
+#night-intro .night-quote {
+  font-size: clamp(12px, 2vw, 16px); letter-spacing: .2em;
+  color: var(--text-dim); font-style: italic; max-width: 500px;
+  opacity: 0; animation: fadeInUp 1.4s ease forwards 1.6s;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes nightPulse {
+  0% { opacity: 0; transform: scale(1.3); filter: blur(8px); }
+  40% { opacity: 1; transform: scale(1); filter: blur(0); }
+  75% { opacity: 1; }
+  100% { opacity: 0.6; transform: scale(1.02); }
+}
+
+/* ============================================================
    BOOT
    ============================================================ */
 #boot {
@@ -149,7 +225,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .difficulty-card p { font-size: 12px; color: var(--text-dim); }
 
 /* ============================================================
-   HUD (base — works both PC/mobile)
+   HUD
    ============================================================ */
 #hud {
   position: fixed; inset: 0; z-index: 40; pointer-events: none;
@@ -162,7 +238,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   position: absolute; top: 12px; left: 12px;
   background: rgba(5,7,10,.75); padding: 8px 12px;
   border-left: 3px solid var(--accent);
-  max-width: 60vw;
+  max-width: 55vw;
 }
 #hud .top-left .night { color: var(--accent-bright); font-weight: 700; letter-spacing: .2em; font-size: 12px; }
 #hud .top-left .objective { color: var(--text); margin-top: 4px; font-size: 11px; line-height: 1.35; }
@@ -199,6 +275,28 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 #prompt.show { opacity: 1; }
 
 /* ============================================================
+   FLASHLIGHT INDICATOR
+   ============================================================ */
+#flashlight-ind {
+  position: absolute; bottom: 70px; right: 18px;
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 2px solid #2a333d; background: rgba(10,15,20,.85);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--text-dim);
+  transition: all .2s;
+}
+#flashlight-ind.on { border-color: var(--warn); color: var(--warn); box-shadow: 0 0 14px rgba(201,161,46,.5); }
+#flashlight-ind .battery {
+  position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+  width: 30px; height: 3px; background: #1a2129;
+}
+#flashlight-ind .battery > i {
+  display: block; height: 100%; width: 100%; background: var(--warn);
+  transition: width .3s, background .3s;
+}
+#flashlight-ind.low .battery > i { background: var(--danger); }
+
+/* ============================================================
    TASK PANEL
    ============================================================ */
 #task-panel {
@@ -213,13 +311,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 #task-panel h3 { font-size: 11px; letter-spacing: .2em; color: var(--accent-bright); margin-bottom: 8px; text-transform: uppercase; }
 #task-panel .task {
   display: flex; justify-content: space-between; padding: 5px 0;
-  border-bottom: 1px dashed #1a2129; font-size: 11px;
-  gap: 6px;
+  border-bottom: 1px dashed #1a2129; font-size: 11px; gap: 6px;
 }
 #task-panel .task:last-child { border-bottom: none; }
 #task-panel .task.done { color: var(--ok); text-decoration: line-through; }
 #task-panel .task .tag { font-size: 9px; color: var(--text-dim); }
 #task-panel .close { position: absolute; top: 6px; right: 8px; color: var(--text-dim); font-size: 16px; }
+#task-panel .corpse-state {
+  margin-top: 10px; padding: 6px 8px; background: #0a0f14;
+  border-left: 2px solid var(--warn); font-size: 10px; color: var(--text-dim);
+  line-height: 1.4;
+}
 
 /* ============================================================
    PHONE
@@ -246,9 +348,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   animation: msgIn .3s ease; word-wrap: break-word;
 }
 #phone .msg.mark { background: #1a2530; align-self: flex-start; border-left: 3px solid var(--accent); }
+#phone .msg.mark.glitch { animation: glitchMsg 0.4s infinite; border-left-color: var(--danger); }
 #phone .msg.me { background: #20303d; align-self: flex-end; }
 #phone .msg .who { font-size: 10px; color: var(--text-dim); margin-bottom: 3px; letter-spacing: .1em; }
 @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glitchMsg {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
 
 /* ============================================================
    INTERACT MODAL
@@ -313,6 +421,32 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 #ending .ending-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
 
 /* ============================================================
+   SCARE OVERLAY
+   ============================================================ */
+#scare-overlay {
+  position: fixed; inset: 0; z-index: 86;
+  background: #000; display: none;
+  align-items: center; justify-content: center;
+  pointer-events: none;
+}
+#scare-overlay.show { display: flex; animation: scareIn .4s ease; }
+#scare-overlay .face {
+  width: min(420px, 70vw); height: min(420px, 70vw);
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(120px, 30vw, 280px);
+  color: #8a0a0a;
+  text-shadow: 0 0 40px rgba(200,0,0,.9), 0 0 80px rgba(200,0,0,.5);
+  animation: faceShake .1s infinite;
+}
+@keyframes scareIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes faceShake {
+  0%,100% { transform: translate(0,0); }
+  25% { transform: translate(-4px,3px); }
+  50% { transform: translate(3px,-2px); }
+  75% { transform: translate(-2px,-3px); }
+}
+
+/* ============================================================
    TOAST
    ============================================================ */
 #toast {
@@ -327,7 +461,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 #toast.show { transform: translateX(-50%) translateY(0); }
 
 /* ============================================================
-   MOBILE TOUCH CONTROLS (only shown on coarse pointer devices)
+   MOBILE CONTROLS
    ============================================================ */
 #mobile-controls { display: none; }
 body.is-touch #mobile-controls { display: block; }
@@ -335,17 +469,14 @@ body.is-touch #mobile-controls { display: block; }
 #joystick-zone {
   position: absolute; left: 0; bottom: 0;
   width: 45%; height: 45%;
-  pointer-events: auto; touch-action: none;
-  z-index: 42;
+  pointer-events: auto; touch-action: none; z-index: 42;
 }
 #joystick-base {
   position: absolute; width: 120px; height: 120px;
   border-radius: 50%; border: 2px solid rgba(255,255,255,.15);
   background: rgba(20,26,33,.4);
   left: 24px; bottom: 24px;
-  pointer-events: none;
-  transition: opacity .2s;
-  opacity: 0;
+  pointer-events: none; transition: opacity .2s; opacity: 0;
 }
 #joystick-base.active { opacity: 1; }
 #joystick-knob {
@@ -356,10 +487,9 @@ body.is-touch #mobile-controls { display: block; }
   pointer-events: none;
 }
 #look-zone {
-  position: absolute; right: 0; bottom: 0;
+  position: absolute; right: 0; top: 0;
   width: 55%; height: 100%;
-  pointer-events: auto; touch-action: none;
-  z-index: 42;
+  pointer-events: auto; touch-action: none; z-index: 41;
 }
 #mobile-buttons {
   position: absolute; right: 16px; bottom: 16px;
@@ -368,7 +498,7 @@ body.is-touch #mobile-controls { display: block; }
 }
 #mobile-buttons button {
   pointer-events: auto;
-  width: 72px; height: 72px; border-radius: 50%;
+  width: 68px; height: 68px; border-radius: 50%;
   background: rgba(30,20,24,.85); border: 2px solid var(--accent);
   color: var(--text); font-size: 13px; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase;
@@ -379,8 +509,9 @@ body.is-touch #mobile-controls { display: block; }
 #mobile-buttons button:active { transform: scale(.92); background: rgba(90,20,24,.9); }
 #mobile-buttons button .ico { font-size: 20px; line-height: 1; }
 #mobile-buttons button .lbl { font-size: 9px; letter-spacing: .05em; }
-#btn-mob-interact { width: 84px !important; height: 84px !important; }
+#btn-mob-interact { width: 80px !important; height: 80px !important; }
 #btn-mob-interact.disabled { opacity: .3; }
+#btn-mob-flashlight.on { border-color: var(--warn); background: rgba(70,50,10,.85); }
 
 #pause-btn {
   position: absolute; top: 12px; right: 12px;
@@ -392,12 +523,9 @@ body.is-touch #mobile-controls { display: block; }
 }
 body.is-touch #pause-btn { display: flex; }
 
-/* ============================================================
-   MOBILE RESPONSIVE TWEAKS
-   ============================================================ */
 body.is-touch #task-panel {
-  top: auto; bottom: 110px; right: 8px;
-  width: 170px; font-size: 10px;
+  top: auto; bottom: 200px; right: 8px;
+  width: 165px; font-size: 10px;
 }
 body.is-touch #hud .top-left { max-width: 45vw; padding: 6px 10px; }
 body.is-touch #hud .top-left .objective { font-size: 10px; }
@@ -406,8 +534,11 @@ body.is-touch #hud .timer { font-size: 16px; }
 body.is-touch #hud .bottom-center { display: none; }
 body.is-touch #crosshair { width: 4px; height: 4px; margin: -2px 0 0 -2px; }
 body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10px; }
+body.is-touch #flashlight-ind { bottom: auto; top: 60px; right: 12px; width: 40px; height: 40px; font-size: 16px; }
 
-/* Portrait warning */
+/* ============================================================
+   PORTRAIT WARNING
+   ============================================================ */
 #portrait-warn {
   position: fixed; inset: 0; z-index: 96;
   background: #05070a; color: var(--text);
@@ -427,6 +558,24 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
   <h1>МОРГ</h1>
   <div class="boot-bar"><i id="boot-bar-fill"></i></div>
   <p id="boot-text">ЗАГРУЗКА...</p>
+</div>
+
+<!-- ============ FX OVERLAYS ============ -->
+<div id="fx-vignette"></div>
+<div id="fx-grain"></div>
+<div id="fx-blood"></div>
+<div id="fx-flash"></div>
+
+<!-- ============ NIGHT INTRO ============ -->
+<div id="night-intro">
+  <div class="night-label">СМЕНА НАЧИНАЕТСЯ</div>
+  <div class="night-num" id="night-intro-num">1</div>
+  <div class="night-quote" id="night-intro-quote">Тишина. Только гул ламп и запах формалина.</div>
+</div>
+
+<!-- ============ SCARE OVERLAY ============ -->
+<div id="scare-overlay">
+  <div class="face" id="scare-face">☠</div>
 </div>
 
 <!-- ============ MENU ============ -->
@@ -449,6 +598,12 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
       <select id="set-quality"><option value="low">Низкое</option><option value="medium" selected>Среднее</option><option value="high">Высокое</option></select>
     </div>
     <div class="row"><label for="set-fov">Угол обзора</label><input type="range" id="set-fov" min="60" max="100" value="75" /></div>
+    <div class="row"><label for="set-flashlight">Фонарик при старте</label>
+      <select id="set-flashlight"><option value="on" selected>Включён</option><option value="off">Выключен</option></select>
+    </div>
+    <div class="row"><label for="set-scares">Скримеры</label>
+      <select id="set-scares"><option value="on" selected>Вкл</option><option value="low">Реже</option><option value="off">Выкл</option></select>
+    </div>
     <div class="modal-actions">
       <button class="menu-btn" id="btn-settings-close" style="width:auto;padding:10px 24px;">Готово</button>
     </div>
@@ -462,13 +617,17 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
     <div class="row"><span>ПК: WASD</span><span>Движение</span></div>
     <div class="row"><span>ПК: Мышь</span><span>Обзор</span></div>
     <div class="row"><span>ПК: E</span><span>Взаимодействие</span></div>
+    <div class="row"><span>ПК: F</span><span>Фонарик</span></div>
     <div class="row"><span>ПК: P / Esc</span><span>Телефон / Пауза</span></div>
     <div class="row"><span>Телефон: стик</span><span>Движение</span></div>
     <div class="row"><span>Телефон: свайп</span><span>Обзор</span></div>
-    <div class="row"><span>Телефон: кнопки</span><span>E / P / Пауза</span></div>
     <p style="margin-top:14px;color:var(--text-dim);font-size:12px;line-height:1.6;">
-      Осматривайте труп, выполняйте задачи ухода, фиксируйте аномалии. Один из трупов — демон.
-      На вторую ночь Марк не придёт, но будет писать. Сожгите демона до рассвета.
+      <b>Цикл работы с трупом:</b><br>
+      1. Подойди к холодильной ячейке → открой → выкати каталку.<br>
+      2. Осмотри тело: 6 процедур (осмотр, температура, кожа, бирка, кровь, фиксация аномалий).<br>
+      3. Закати каталку обратно в ячейку.<br>
+      4. Только после этого тело можно отправить в печь крематория.<br>
+      Один из трупов — демон. Найди его по аномалиям. Сожги до рассвета.
     </p>
     <div class="modal-actions"><button class="menu-btn" id="btn-howto-close" style="width:auto;padding:10px 24px;">Понял</button></div>
   </div>
@@ -480,8 +639,9 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
     <h2>Об игре</h2>
     <p style="line-height:1.7;font-size:13px;">
       <b>Морг: Ночь Демона</b> — процедурный 3D-хоррор в одном HTML-файле.<br>
-      Движок: Three.js (ESM). Без внешних ассетов — всё процедурное.<br>
-      Управление: ПК (WASD+мышь) или тач (стик+свайп).
+      Движок: Three.js (ESM). Все текстуры и модели — процедурные.<br>
+      Управление: ПК (WASD + мышь) или тач (стик + свайп).<br>
+      Три комнаты: морг → коридор → крематорий.
     </p>
     <div class="modal-actions"><button class="menu-btn" id="btn-credits-close" style="width:auto;padding:10px 24px;">Закрыть</button></div>
   </div>
@@ -492,10 +652,10 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
   <div class="modal-panel">
     <h2>Сложность</h2>
     <div class="difficulty-card" data-diff="easy">
-      <h3>Стажёр</h3><p>Больше времени, меньше аномалий, подсказки подробные.</p>
+      <h3>Стажёр</h3><p>Больше времени, меньше аномалий, скримеры реже.</p>
     </div>
     <div class="difficulty-card selected" data-diff="normal">
-      <h3>Смена</h3><p>Стандартный режим. Баланс времени и аномалий.</p>
+      <h3>Смена</h3><p>Стандарт. Баланс времени, аномалий и страха.</p>
     </div>
     <div class="difficulty-card" data-diff="hard">
       <h3>Ночной Кошмар</h3><p>Мало времени, скрытые аномалии, демон активнее.</p>
@@ -523,6 +683,10 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
 <div id="hud">
   <div id="crosshair"></div>
   <div id="prompt"></div>
+  <div id="flashlight-ind" title="Фонарик (F)">
+    🔦
+    <div class="battery"><i id="flashlight-batt"></i></div>
+  </div>
   <div class="top-left">
     <div class="night" id="hud-night">НОЧЬ 1</div>
     <div class="objective" id="hud-objective">...</div>
@@ -531,12 +695,13 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
     <div class="timer" id="hud-timer">03:00</div>
     <div style="color:var(--text-dim);font-size:10px;margin-top:2px;">до рассвета</div>
   </div>
-  <div class="bottom-center" id="hud-hint">WASD — двигаться · E — взаимодействие · P — телефон · Esc — пауза</div>
+  <div class="bottom-center" id="hud-hint">WASD — двигаться · E — действие · F — фонарик · P — телефон · Esc — пауза</div>
 
   <div id="task-panel">
     <button class="close" id="task-close">×</button>
     <h3>Задачи ухода</h3>
     <div id="task-list"></div>
+    <div class="corpse-state" id="corpse-state">—</div>
   </div>
 
   <!-- ============ MOBILE TOUCH CONTROLS ============ -->
@@ -547,6 +712,7 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
     </div>
     <div id="mobile-buttons">
       <button id="btn-mob-interact" class="disabled"><span class="ico">E</span><span class="lbl">действие</span></button>
+      <button id="btn-mob-flashlight"><span class="ico">🔦</span><span class="lbl">свет</span></button>
       <button id="btn-mob-phone"><span class="ico">✉</span><span class="lbl">SMS</span></button>
       <button id="btn-mob-pause"><span class="ico">❚❚</span><span class="lbl">пауза</span></button>
     </div>
@@ -591,7 +757,6 @@ body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10p
 
 <!-- ============ TOAST ============ -->
 <div id="toast"></div>
-
 <script type="importmap">
 {
   "imports": {
@@ -608,46 +773,54 @@ import * as THREE from 'three';
    ============================================================ */
 const IS_TOUCH = matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
 if (IS_TOUCH) document.body.classList.add('is-touch');
+const vibrate = (ms) => { if (IS_TOUCH && navigator.vibrate) navigator.vibrate(ms); };
 
 /* ============================================================
    CONFIG
    ============================================================ */
 const CFG = {
-  nightDuration: { easy: 240, normal: 180, hard: 120 },
+  nightDuration: { easy: 300, normal: 240, hard: 180 },
   moveSpeed: 3.2,
-  runSpeed: 5.2,
+  runSpeed: 5.0,
   mouseSensBase: 0.0022,
-  touchSensBase: 0.006,
-  interactDist: 2.6,
+  touchSensBase: 0.0055,
+  interactDist: 2.8,
   fov: 75,
+  flashlightDrain: 1 / 240,   // полный заряд за ~4 минуты
+  flashlightRecharge: 1 / 90, // в ячейке подзаряжается
 };
 
 const DIFFICULTY = {
-  easy:   { anomaliesCount: 2, demonAggro: 0.0 },
-  normal: { anomaliesCount: 3, demonAggro: 0.4 },
-  hard:   { anomaliesCount: 4, demonAggro: 1.0 },
+  easy:   { anomaliesCount: 2, scareRate: 1 / 45 },
+  normal: { anomaliesCount: 3, scareRate: 1 / 25 },
+  hard:   { anomaliesCount: 4, scareRate: 1 / 15 },
 };
 
 const TASKS_DEF = [
-  { id: 'inspect', name: 'Внешний осмотр',       tag: 'осмотр',   hint: 'Осмотреть тело на предмет повреждений' },
-  { id: 'thermo',  name: 'Температура',          tag: 'прибор',   hint: 'Термометр в прямой кишке' },
-  { id: 'skin',    name: 'Проба кожи',           tag: 'тактиль',  hint: 'Проверить эластичность и цвет' },
-  { id: 'tag',     name: 'Сверить бирку',        tag: 'документ', hint: 'Сверить номер с журналом' },
-  { id: 'blood',   name: 'Забор крови',          tag: 'анализ',   hint: 'Взять пробу из вены' },
-  { id: 'anomaly', name: 'Фиксация аномалий',    tag: 'ритуал',   hint: 'Отметить все отклонения' },
+  { id: 'inspect', name: 'Внешний осмотр',   tag: 'осмотр',   hint: 'Осмотреть тело на повреждения' },
+  { id: 'thermo',  name: 'Температура',      tag: 'прибор',   hint: 'Термометр в прямой кишке' },
+  { id: 'skin',    name: 'Проба кожи',       tag: 'тактиль',  hint: 'Эластичность и цвет' },
+  { id: 'tag',     name: 'Сверить бирку',    tag: 'документ', hint: 'Сверить номер с журналом' },
+  { id: 'blood',   name: 'Забор крови',      tag: 'анализ',   hint: 'Проба из вены' },
+  { id: 'anomaly', name: 'Фиксация аномалий',tag: 'ритуал',   hint: 'Отметить отклонения' },
 ];
 
 const ANOMALY_POOL = [
-  { id: 'cold_spot',  text: 'Кожа ледяная в одной точке, вокруг неё — иней.' },
-  { id: 'eye_move',   text: 'Глаза под веками двигаются, хотя зрачки не реагируют.' },
-  { id: 'nail_grow',  text: 'Ногти на левой руке длиннее, чем на правой.' },
-  { id: 'faint_marks',text: 'На шее едва заметные следы, будто от пальцев.' },
-  { id: 'whisper',    text: 'Из груди доносится едва слышный шёпот.' },
-  { id: 'blood_warm', text: 'Кровь из вены тёплая и не сворачивается.' },
-  { id: 'tag_wrong',  text: 'Номер на бирке не совпадает с журналом на 1 цифру.' },
-  { id: 'shadow',     text: 'Тень от тела падает не в ту сторону, что от стола.' },
-  { id: 'smell',      text: 'Запах — не формалиновый, а сладковатый, тошнотворный.' },
-  { id: 'twitch',     text: 'Пальцы дёргаются, когда вы отворачиваетесь.' },
+  { id: 'cold_spot',   text: 'Кожа ледяная в одной точке, вокруг — иней.' },
+  { id: 'eye_move',    text: 'Глаза под веками двигаются, зрачки не реагируют.' },
+  { id: 'nail_grow',   text: 'Ногти на левой руке длиннее, чем на правой.' },
+  { id: 'faint_marks', text: 'На шее едва заметные следы, будто от пальцев.' },
+  { id: 'whisper',     text: 'Из груди доносится едва слышный шёпот.' },
+  { id: 'blood_warm',  text: 'Кровь тёплая и не сворачивается.' },
+  { id: 'tag_wrong',   text: 'Номер на бирке не совпадает с журналом.' },
+  { id: 'shadow',      text: 'Тень падает не в ту сторону, что от стола.' },
+  { id: 'smell',       text: 'Запах не формалиновый, а сладковатый, тошнотворный.' },
+  { id: 'twitch',      text: 'Пальцы дёргаются, когда отворачиваешься.' },
+];
+
+const SCARE_TEXTS = [
+  'ОН СМОТРИТ', 'СЗАДИ', 'НЕ ОБОРАЧИВАЙСЯ', 'ТЫ СЛЕДУЮЩИЙ',
+  'ОТКРОЙ ЯЧЕЙКУ', 'Я ВИЖУ ТЕБЯ', 'БЕГИ', 'МАРК?', 'ТИХО',
 ];
 
 /* ============================================================
@@ -678,13 +851,18 @@ const State = {
   night: 0,
   running: false,
   paused: false,
+  introActive: false,
   timeLeft: 0,
-  corpses: [],
+  corpses: [],           // { id, isDemon, anomalies, tagNumber, tagMismatch, tasksDone, drawnOut, returned, burned }
   activeCorpse: null,
   demonBurned: false,
   ending: null,
   volume: 0.7, sensitivity: 1.0, quality: IS_TOUCH ? 'low' : 'medium', fov: 75,
+  flashlightOn: true, flashlightBattery: 1,
+  scareMode: 'on', flashOnStart: 'on',
   _hovered: null,
+  // horror
+  scareTimer: 20, demonPulse: 0, breathVolume: 0,
 };
 
 /* ============================================================
@@ -698,7 +876,7 @@ const State = {
     fill.style.width = `${Math.min(100, ((i + 1) / steps.length) * 100)}%`;
     txt.textContent = steps[i] || '';
     i++;
-    if (i < steps.length) setTimeout(tick, 320 + Math.random() * 180);
+    if (i < steps.length) setTimeout(tick, 300 + Math.random() * 180);
     else setTimeout(() => {
       $('#boot').classList.add('hidden');
       $('#menu').classList.remove('hidden');
@@ -735,17 +913,27 @@ $('#set-volume').addEventListener('input', (e) => { State.volume = e.target.valu
 $('#set-sensitivity').addEventListener('input', (e) => { State.sensitivity = e.target.value / 100; });
 $('#set-quality').addEventListener('change', (e) => { State.quality = e.target.value; applyQuality(); });
 $('#set-fov').addEventListener('input', (e) => { State.fov = +e.target.value; if (camera) { camera.fov = State.fov; camera.updateProjectionMatrix(); } });
+$('#set-flashlight').addEventListener('change', (e) => { State.flashOnStart = e.target.value; });
+$('#set-scares').addEventListener('change', (e) => { State.scareMode = e.target.value; });
 
 /* ============================================================
    THREE.JS SETUP
    ============================================================ */
 let renderer, scene, camera, clock;
-let player = { yaw: 0, pitch: 0, pos: new THREE.Vector3(0, 1.6, 3.8) };
+let player = { yaw: 0, pitch: 0, pos: new THREE.Vector3(0, 1.6, 8), vel: new THREE.Vector2() };
 let keys = {};
 let lights = [];
-let interactiveObjects = [];
+let interactiveObjects = [];   // { mesh, action }
 let animStarted = false;
 let isLocked = false;
+
+let flashlight, flashTarget = new THREE.Object3D();
+let corpseMeshes = [];         // THREE.Group[] по индексу трупа
+let drawerMeshes = [];         // дверцы ячеек
+let gurney = null;             // каталка, используется при осмотре
+let crematorGroup = null;
+let crematorLight = null;
+let crematorFire = null;
 
 function initThree() {
   renderer = new THREE.WebGLRenderer({ antialias: State.quality !== 'low', powerPreference: 'high-performance' });
@@ -754,23 +942,23 @@ function initThree() {
   renderer.shadowMap.enabled = State.quality === 'high';
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.35;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   document.body.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x05070a);
-  scene.fog = new THREE.FogExp2(0x05070a, 0.06);
+  scene.background = new THREE.Color(0x0a0d12);
+  scene.fog = new THREE.FogExp2(0x0a0d12, 0.045);
 
-  camera = new THREE.PerspectiveCamera(State.fov, window.innerWidth / window.innerHeight, 0.05, 100);
+  camera = new THREE.PerspectiveCamera(State.fov, window.innerWidth / window.innerHeight, 0.05, 60);
   camera.position.copy(player.pos);
   camera.rotation.order = 'YXZ';
 
   clock = new THREE.Clock();
 
-  buildMorgueRoom();
-  buildCrematorium();
-  scene.add(new THREE.AmbientLight(0x2a3a4a, 0.3));
+  buildWorld();
+  buildFlashlight();
+  buildCrematorFire();
 
   window.addEventListener('resize', onResize);
 }
@@ -780,7 +968,6 @@ function applyQuality() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, State.quality === 'high' ? 2 : 1));
   renderer.shadowMap.enabled = State.quality === 'high';
 }
-
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -788,194 +975,413 @@ function onResize() {
 }
 
 /* ---------- MATERIALS ---------- */
-function tileMat(color = 0x394650) {
+function tileMat(color = 0x3e4a54) {
   const c = document.createElement('canvas'); c.width = c.height = 256;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#' + new THREE.Color(color).getHexString();
   ctx.fillRect(0, 0, 256, 256);
-  ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 3;
   for (let i = 0; i <= 256; i += 64) {
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
   }
-  for (let i = 0; i < 40; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${rand(0.03, 0.15)})`;
-    ctx.beginPath(); ctx.arc(rand(0,256), rand(0,256), rand(2,12), 0, Math.PI * 2); ctx.fill();
+  for (let i = 0; i < 50; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${rand(0.03, 0.18)})`;
+    ctx.beginPath(); ctx.arc(rand(0,256), rand(0,256), rand(2,14), 0, Math.PI * 2); ctx.fill();
+  }
+  // blood stains
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = `rgba(90,10,10,${rand(0.15, 0.35)})`;
+    ctx.beginPath(); ctx.ellipse(rand(0,256), rand(0,256), rand(8,25), rand(5,15), rand(0,6.28), 0, 6.28); ctx.fill();
   }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 4);
   tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
-  return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.05 });
+  return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.65, metalness: 0.05 });
 }
 function wallMat() {
   const c = document.createElement('canvas'); c.width = c.height = 512;
   const ctx = c.getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#2a323a'); grad.addColorStop(0.5, '#212830'); grad.addColorStop(1, '#151b20');
+  grad.addColorStop(0, '#2e3640'); grad.addColorStop(0.5, '#232a32'); grad.addColorStop(1, '#161c22');
   ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 60; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${rand(0.05, 0.2)})`;
-    ctx.fillRect(rand(0,512), rand(0,512), rand(2,30), rand(2,8));
+  for (let i = 0; i < 70; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${rand(0.05, 0.22)})`;
+    ctx.fillRect(rand(0,512), rand(0,512), rand(2,35), rand(2,10));
+  }
+  // blood streaks
+  for (let i = 0; i < 5; i++) {
+    const x = rand(0, 512);
+    ctx.fillStyle = `rgba(80,5,5,${rand(0.2, 0.5)})`;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + rand(-8,8), rand(60, 200)); ctx.lineTo(x + rand(-15,15), rand(200, 400)); ctx.lineTo(x - 6, 500); ctx.lineTo(x + 10, 500); ctx.lineTo(x + 8, 200); ctx.lineTo(x - 3, 0); ctx.closePath(); ctx.fill();
   }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(2, 1);
-  return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85 });
+  return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 });
 }
 function metalMat(color = 0x6a7480) {
   return new THREE.MeshStandardMaterial({ color, metalness: 0.85, roughness: 0.35 });
 }
 
-/* ---------- ROOM ---------- */
-function buildMorgueRoom() {
-  const W = 12, D = 10, H = 3.2;
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x36434e));
-  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+/* ---------- WORLD: 3 ROOMS ---------- */
+// Координаты:
+//   Морг:       x ∈ [-6, 6],  z ∈ [-5, 3]   (центр 0, 0, -1)
+//   Коридор:    x ∈ [6, 10],  z ∈ [0, 2]    (проход справа)
+//   Крематорий: x ∈ [10, 18], z ∈ [-4, 4]   (центр 14, 0, 0)
 
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D),
-    new THREE.MeshStandardMaterial({ color: 0x11161b, roughness: 1 }));
-  ceil.rotation.x = Math.PI / 2; ceil.position.y = H; scene.add(ceil);
-
-  const wm = wallMat(); const wallGeo = new THREE.PlaneGeometry(W, H);
-  const back = new THREE.Mesh(wallGeo, wm); back.position.set(0, H/2, -D/2); scene.add(back);
-  const front = new THREE.Mesh(wallGeo, wm); front.position.set(0, H/2, D/2); front.rotation.y = Math.PI; scene.add(front);
-  const left = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm); left.position.set(-W/2, H/2, 0); left.rotation.y = Math.PI/2; scene.add(left);
-  const right = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm); right.position.set(W/2, H/2, 0); right.rotation.y = -Math.PI/2; scene.add(right);
-
-  // Lights (fewer on touch/low)
-  const count = State.quality === 'low' ? 2 : 4;
-  const positions = [[-3, 2.8, -3], [3, 2.8, -3], [-3, 2.8, 3], [3, 2.8, 3]];
-  for (let i = 0; i < count; i++) {
-    const [x, y, z] = positions[i];
-    const tube = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 1.0, 3, 6),
-      new THREE.MeshBasicMaterial({ color: 0xd8f0ff }));
-    tube.rotation.z = Math.PI / 2; tube.position.set(x, y, z); scene.add(tube);
-    const pl = new THREE.PointLight(0xbcd8f0, State.quality === 'low' ? 1.1 : 1.2, 9, 2);
-    pl.position.set(x, y - 0.2, z);
-    if (State.quality === 'high') { pl.castShadow = true; pl.shadow.mapSize.set(512, 512); }
-    scene.add(pl); lights.push(pl);
-  }
-
-  // Tables + corpses
-  const tablePositions = [
-    new THREE.Vector3(-3, 0, -1.5),
-    new THREE.Vector3( 0, 0, -2.5),
-    new THREE.Vector3( 3, 0, -1.5),
-  ];
-  for (let i = 0; i < tablePositions.length; i++) buildTable(tablePositions[i], i);
-
-  // Cabinets
-  for (let i = 0; i < 6; i++) {
-    const cabinet = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 0.5), metalMat(0x55606b));
-    cabinet.position.set(-W/2 + 1.2 + i * 1.3, 1.1, -D/2 + 0.3);
-    cabinet.castShadow = State.quality === 'high'; cabinet.receiveShadow = true;
-    scene.add(cabinet);
-    for (let j = 0; j < 3; j++) {
-      const handle = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.04, 0.04), metalMat(0x8a95a1));
-      handle.position.set(cabinet.position.x, 0.5 + j * 0.65, -D/2 + 0.58);
-      scene.add(handle);
-    }
-  }
-
-  // Sink
-  const sink = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.15, 0.6), metalMat(0x7a8490));
-  sink.position.set(W/2 - 0.7, 0.95, -1); scene.add(sink);
-  const basin = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.4, 0.45),
-    new THREE.MeshStandardMaterial({ color: 0x2a3038, roughness: 0.4 }));
-  basin.position.set(W/2 - 0.7, 1.2, -1); scene.add(basin);
-  const tap = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.35, 8), metalMat(0xaab4c0));
-  tap.position.set(W/2 - 0.7, 1.45, -1.15); scene.add(tap);
+function buildWorld() {
+  buildMorgue();
+  buildCorridor();
+  buildCrematoriumRoom();
+  // Ambient — выше, чтобы не было «чёрной дыры»
+  scene.add(new THREE.AmbientLight(0x3a4a5a, 0.55));
+  const hemi = new THREE.HemisphereLight(0x4a5a6a, 0x1a1010, 0.35);
+  scene.add(hemi);
 }
 
-function buildTable(pos, index) {
-  const g = new THREE.Group(); g.position.copy(pos);
-  const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.85, 6);
-  for (const [dx, dz] of [[-0.9,-0.35],[0.9,-0.35],[-0.9,0.35],[0.9,0.35]]) {
-    const leg = new THREE.Mesh(legGeo, metalMat(0x5a6570));
-    leg.position.set(dx, 0.42, dz); leg.castShadow = State.quality === 'high'; g.add(leg);
+function makeLamp(x, y, z, color = 0xbcd8f0, intensity = 1.6, distance = 10, castShadow = false) {
+  const tube = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 1.1, 3, 6),
+    new THREE.MeshBasicMaterial({ color: 0xd8f0ff }));
+  tube.rotation.z = Math.PI / 2;
+  tube.position.set(x, y, z);
+  scene.add(tube);
+  const pl = new THREE.PointLight(color, intensity, distance, 2);
+  pl.position.set(x, y - 0.2, z);
+  if (castShadow && State.quality === 'high') { pl.castShadow = true; pl.shadow.mapSize.set(512, 512); }
+  scene.add(pl);
+  lights.push(pl);
+  return pl;
+}
+
+function buildMorgue() {
+  const W = 12, D = 8, H = 3.2, CZ = -1; // центр по Z
+
+  // пол
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x3e4a54));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, 0, CZ);
+  floor.receiveShadow = State.quality === 'high';
+  scene.add(floor);
+
+  // потолок
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D),
+    new THREE.MeshStandardMaterial({ color: 0x141920, roughness: 1 }));
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, CZ); scene.add(ceil);
+
+  // стены (back, front, left)
+  const wm = wallMat();
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
+  back.position.set(0, H/2, CZ - D/2); scene.add(back);
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
+  front.position.set(0, H/2, CZ + D/2); front.rotation.y = Math.PI; scene.add(front);
+  const left = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm);
+  left.position.set(-W/2, H/2, CZ); left.rotation.y = Math.PI/2; scene.add(left);
+
+  // правая стена с проёмом в коридор: две секции
+  const rightA = new THREE.Mesh(new THREE.PlaneGeometry(3, H), wm);
+  rightA.position.set(W/2, H/2, CZ - D/2 + 1.5); rightA.rotation.y = -Math.PI/2; scene.add(rightA);
+  const rightB = new THREE.Mesh(new THREE.PlaneGeometry(3.5, H), wm);
+  rightB.position.set(W/2, H/2, CZ + D/2 - 1.75); rightB.rotation.y = -Math.PI/2; scene.add(rightB);
+  // верх проёма
+  const rightTop = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.8), wm);
+  rightTop.position.set(W/2, H - 0.4, CZ + 0.25); rightTop.rotation.y = -Math.PI/2; scene.add(rightTop);
+
+  // лампы — 4, ярче
+  makeLamp(-3, 2.8, CZ - 2, 0xbcd8f0, 1.8, 10);
+  makeLamp( 3, 2.8, CZ - 2, 0xbcd8f0, 1.8, 10);
+  makeLamp(-3, 2.8, CZ + 2, 0xc8dcf0, 1.5, 9);
+  makeLamp( 3, 2.8, CZ + 2, 0xc8dcf0, 1.5, 9);
+
+  // холодильные ячейки на задней стене (6 штук, 3 заняты)
+  for (let i = 0; i < 6; i++) {
+    buildFridgeCell(i, -W/2 + 1.2 + i * 2.0, 1.1, CZ - D/2 + 0.35);
   }
-  const top = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.08, 0.9), metalMat(0x77818c));
-  top.position.y = 0.88; top.castShadow = State.quality === 'high'; top.receiveShadow = true; g.add(top);
 
-  const corpse = buildCorpseMesh(index);
-  corpse.position.set(0, 0.96, 0); g.add(corpse);
+  // стол для инструментов
+  const table = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.7), metalMat(0x77818c));
+  table.position.set(4.2, 0.88, CZ + 2.5);
+  scene.add(table);
+  const tableLegs = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.85, 0.05), metalMat(0x3a424b));
+  tableLegs.position.set(4.2, 0.42, CZ + 2.5);
+  scene.add(tableLegs);
 
+  // каталка (появляется при выкатке)
+  buildGurney(W/2 - 1, CZ + 3);
+}
+
+function buildFridgeCell(index, x, y, z) {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+
+  // корпус
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 2.0, 0.7), metalMat(0x4a555f));
+  body.castShadow = State.quality === 'high';
+  g.add(body);
+
+  // дверь (открывается)
+  const doorPivot = new THREE.Group();
+  doorPivot.position.set(0, 0, 0.36);
+  g.add(doorPivot);
+  const door = new THREE.Mesh(new THREE.BoxGeometry(1.55, 1.85, 0.05), metalMat(0x5c6670));
+  door.position.set(0, 0, 0.02);
+  doorPivot.add(door);
+
+  // ручка
+  const handle = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.06, 0.06), metalMat(0xaab4c0));
+  handle.position.set(0.5, 0, 0.06);
+  doorPivot.add(handle);
+
+  // номер
+  const numCanvas = document.createElement('canvas');
+  numCanvas.width = 64; numCanvas.height = 64;
+  const nctx = numCanvas.getContext('2d');
+  nctx.fillStyle = '#000'; nctx.fillRect(0,0,64,64);
+  nctx.fillStyle = '#aaa'; nctx.font = 'bold 40px monospace'; nctx.textAlign = 'center'; nctx.textBaseline = 'middle';
+  nctx.fillText(String(index + 1), 32, 32);
+  const numTex = new THREE.CanvasTexture(numCanvas);
+  const numMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.3),
+    new THREE.MeshBasicMaterial({ map: numTex, transparent: true }));
+  numMesh.position.set(-0.55, 0.75, 0.05);
+  doorPivot.add(numMesh);
+
+  // индикатор занятости
+  const busyLight = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x222222 }));
+  busyLight.position.set(0.55, 0.75, 0.05);
+  doorPivot.add(busyLight);
+
+  // интерактивный хотспот
   const hotspot = new THREE.Mesh(
-    new THREE.BoxGeometry(2.2, 0.6, 1.0),
+    new THREE.BoxGeometry(1.8, 2.1, 0.9),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
   );
-  hotspot.position.set(0, 1.2, 0);
-  hotspot.userData.action = { type: 'corpse', index };
-  g.add(hotspot); interactiveObjects.push(hotspot);
+  hotspot.position.set(0, 0, 0.4);
+  hotspot.userData.action = { type: 'fridge', index };
+  g.add(hotspot);
+  interactiveObjects.push(hotspot);
 
   scene.add(g);
+
+  drawerMeshes[index] = { group: g, doorPivot, busyLight, hotspot, corpse: null, open: false };
 }
 
-function buildCorpseMesh(index) {
+function buildGurney(x, z) {
   const g = new THREE.Group();
-  const skinMat = new THREE.MeshStandardMaterial({ color: 0xb8b8ac, roughness: 0.9 });
-
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 1.1, 4, 10), skinMat);
-  torso.rotation.z = Math.PI / 2; torso.castShadow = State.quality === 'high'; g.add(torso);
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), skinMat);
-  head.position.set(-0.75, 0.02, 0); g.add(head);
-
-  for (const dz of [-0.12, 0.12]) {
-    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.9, 3, 6), skinMat);
-    leg.rotation.z = Math.PI / 2; leg.position.set(0.95, -0.05, dz); g.add(leg);
+  g.position.set(x, 0, z);
+  // рама
+  const top = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 0.9), metalMat(0x8a95a1));
+  top.position.y = 0.88; g.add(top);
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.04, 0.04), metalMat(0x8a95a1));
+  rail.position.set(0, 1.05, -0.42); g.add(rail);
+  const rail2 = rail.clone(); rail2.position.z = 0.42; g.add(rail2);
+  // ножки
+  const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.85, 6);
+  for (const [dx, dz] of [[-0.95,-0.35],[0.95,-0.35],[-0.95,0.35],[0.95,0.35]]) {
+    const leg = new THREE.Mesh(legGeo, metalMat(0x5a6570));
+    leg.position.set(dx, 0.42, dz); g.add(leg);
   }
-  for (const dz of [-0.3, 0.3]) {
-    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.8, 3, 6), skinMat);
-    arm.rotation.z = Math.PI / 2; arm.position.set(-0.15, 0.02, dz); g.add(arm);
+  // колёса
+  for (const [dx, dz] of [[-0.95,-0.35],[0.95,-0.35],[-0.95,0.35],[0.95,0.35]]) {
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.05, 10), metalMat(0x222222));
+    wheel.rotation.z = Math.PI/2;
+    wheel.position.set(dx, 0.08, dz); g.add(wheel);
   }
-  skinMat.color.offsetHSL(rand(-0.03, 0.03), rand(-0.05, 0.05), rand(-0.05, 0.05));
-  g.rotation.y = rand(-0.05, 0.05);
-  g.userData.skinMat = skinMat;
-  return g;
+  g.visible = false;
+  scene.add(g);
+  gurney = g;
 }
 
-function buildCrematorium() {
-  const group = new THREE.Group(); group.position.set(0, 0, 4.4);
-  const frame = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.6, 0.15), metalMat(0x3a424b));
-  frame.position.set(0, 1.3, 0); group.add(frame);
-  const door = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.3, 0.1), metalMat(0x1f262d));
-  door.position.set(0, 1.15, 0.01); group.add(door);
-  const ind = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8),
-    new THREE.MeshBasicMaterial({ color: 0x3a1a1a }));
-  ind.position.set(0, 2.55, 0.05); group.add(ind);
-  group.userData.indicator = ind;
+function buildCorridor() {
+  const W = 4, D = 2.5, H = 3.2;
+  const cx = 8, cz = 1;
+  // пол
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x333d46));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(cx, 0.01, cz);
+  scene.add(floor);
+  // потолок
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D),
+    new THREE.MeshStandardMaterial({ color: 0x0f1419 }));
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(cx, H, cz); scene.add(ceil);
+  // стены
+  const wm = wallMat();
+  const north = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
+  north.position.set(cx, H/2, cz - D/2); scene.add(north);
+  const south = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
+  south.position.set(cx, H/2, cz + D/2); south.rotation.y = Math.PI; scene.add(south);
+  // лампа
+  const corridorLamp = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.6, 3, 6),
+    new THREE.MeshBasicMaterial({ color: 0xffaa55 }));
+  corridorLamp.rotation.z = Math.PI / 2;
+  corridorLamp.position.set(cx, H - 0.3, cz); scene.add(corridorLamp);
+  const cl = new THREE.PointLight(0xff7744, 1.0, 5, 2);
+  cl.position.set(cx, H - 0.4, cz); scene.add(cl); lights.push(cl);
+}
 
-  const leverBase = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.15), metalMat(0x55606b));
-  leverBase.position.set(1.35, 1.2, 0.02); group.add(leverBase);
+function buildCrematoriumRoom() {
+  const W = 8, D = 8, H = 3.4, cx = 14, cz = 0;
 
-  const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8), metalMat(0x8a95a1));
-  lever.position.set(1.35, 1.35, 0.15); lever.rotation.x = -0.4;
-  lever.userData.action = { type: 'cremator' };
-  group.add(lever); interactiveObjects.push(lever);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x353028));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(cx, 0.01, cz);
+  scene.add(floor);
 
-  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8),
-    new THREE.MeshStandardMaterial({ color: 0x8a1a1a, roughness: 0.5 }));
-  tip.position.set(0, 0.28, 0); lever.add(tip);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D),
+    new THREE.MeshStandardMaterial({ color: 0x0a0605 }));
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(cx, H, cz); scene.add(ceil);
 
-  scene.add(group);
-  const cl = new THREE.PointLight(0xff5533, 0, 5, 2);
-  cl.position.set(0, 1.5, 4.2); scene.add(cl);
-  scene.userData.crematorLight = cl;
-  scene.userData.crematorGroup = group;
+  const wm = wallMat();
+  const north = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
+  north.position.set(cx, H/2, cz - D/2); scene.add(north);
+  const south = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
+  south.position.set(cx, H/2, cz + D/2); south.rotation.y = Math.PI; scene.add(south);
+  const east = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm);
+  east.position.set(cx + W/2, H/2, cz); east.rotation.y = -Math.PI/2; scene.add(east);
+  // западная стена с проёмом в коридор (в центре)
+  const westA = new THREE.Mesh(new THREE.PlaneGeometry(3, H), wm);
+  westA.position.set(cx - W/2, H/2, cz - D/2 + 1.5); westA.rotation.y = Math.PI/2; scene.add(westA);
+  const westB = new THREE.Mesh(new THREE.PlaneGeometry(3, H), wm);
+  westB.position.set(cx - W/2, H/2, cz + D/2 - 1.5); westB.rotation.y = Math.PI/2; scene.add(westB);
+
+  // лампы — поменьше, красноватые
+  makeLamp(cx - 2, 2.9, cz - 2, 0xffaa66, 1.3, 8);
+  makeLamp(cx + 2, 2.9, cz + 2, 0xff7744, 1.3, 8);
+
+  // печь у восточной стены
+  buildCremator(cx + 2.5, cz);
+
+  // полки с урнами
+  for (let i = 0; i < 4; i++) {
+    const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.06, 1.2), metalMat(0x6a7480));
+    shelf.position.set(cx - 3.7, 0.8 + i * 0.4, cz - 3);
+    scene.add(shelf);
+    for (let j = 0; j < 3; j++) {
+      const urn = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.2, 8), metalMat(0x8a95a1));
+      urn.position.set(cx - 3.7, 0.9 + i * 0.4, cz - 3.4 + j * 0.4);
+      scene.add(urn);
+    }
+  }
+}
+
+function buildCremator(x, z) {
+  const g = new THREE.Group();
+  g.position.set(x, 0, z);
+
+  // корпус
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.2, 1.5), metalMat(0x3a3a3a));
+  body.position.y = 1.1;
+  body.castShadow = State.quality === 'high';
+  g.add(body);
+
+  // труба
+  const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 2.5, 10), metalMat(0x2a2a2a));
+  pipe.position.set(-0.7, 3.4, 0);
+  g.add(pipe);
+
+  // дверца
+  const doorPivot = new THREE.Group();
+  doorPivot.position.set(0, 1.1, 0.76);
+  g.add(doorPivot);
+  const door = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.3, 0.06), metalMat(0x1a1a1a));
+  doorPivot.add(door);
+
+  // ручка-рычаг
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8), metalMat(0x8a2a2a));
+  handle.position.set(0, 0, 0.1);
+  handle.rotation.z = Math.PI / 2;
+  doorPivot.add(handle);
+
+  // окошко (светится когда печь активна)
+  const window_ = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.35),
+    new THREE.MeshBasicMaterial({ color: 0x110000 }));
+  window_.position.set(0, 0.2, 0.04);
+  doorPivot.add(window_);
+
+  // рычаг активации
+  const leverPivot = new THREE.Group();
+  leverPivot.position.set(1.5, 1.4, 0.5);
+  g.add(leverPivot);
+  const leverBase = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.3, 0.2), metalMat(0x555555));
+  leverPivot.add(leverBase);
+  const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.6, 8), metalMat(0x999999));
+  lever.position.y = 0.35;
+  leverPivot.add(lever);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0xaa2222 }));
+  tip.position.y = 0.65;
+  leverPivot.add(tip);
+
+  // интерактив
+  const hotspot = new THREE.Mesh(
+    new THREE.BoxGeometry(3.0, 2.5, 2.0),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+  );
+  hotspot.position.set(0, 1.4, 0.5);
+  hotspot.userData.action = { type: 'cremator' };
+  g.add(hotspot);
+  interactiveObjects.push(hotspot);
+
+  scene.add(g);
+  crematorGroup = { group: g, doorPivot, window_, leverPivot, fire: null };
+
+  // свет печи (потом включается)
+  crematorLight = new THREE.PointLight(0xff4400, 0, 6, 2);
+  crematorLight.position.set(x, 1.2, z + 1.5);
+  scene.add(crematorLight);
+}
+
+function buildCrematorFire() {
+  // огонь — набор плоскостей с процедурной текстурой, крутится у печи
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createRadialGradient(64, 100, 5, 64, 60, 64);
+  grad.addColorStop(0, 'rgba(255,200,50,0.9)');
+  grad.addColorStop(0.4, 'rgba(255,100,20,0.7)');
+  grad.addColorStop(1, 'rgba(100,20,0,0)');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+  const tex = new THREE.CanvasTexture(canvas);
+
+  const fireGroup = new THREE.Group();
+  for (let i = 0; i < 5; i++) {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    p.position.set(rand(-0.5, 0.5), 0.8 + rand(-0.2, 0.2), 0.9 + rand(-0.1, 0.1));
+    p.userData.baseY = p.position.y;
+    p.userData.phase = rand(0, 6.28);
+    fireGroup.add(p);
+  }
+  fireGroup.position.set(16.5, 0, 0);
+  fireGroup.visible = false;
+  scene.add(fireGroup);
+  if (crematorGroup) crematorGroup.fire = fireGroup;
+}
+
+/* ---------- FLASHLIGHT ---------- */
+function buildFlashlight() {
+  flashlight = new THREE.SpotLight(0xfff0d0, 0, 12, Math.PI / 6, 0.35, 1.2);
+  flashlight.position.set(0.2, 1.6, 0);
+  flashlight.target = flashTarget;
+  if (State.quality === 'high') {
+    flashlight.castShadow = true;
+    flashlight.shadow.mapSize.set(512, 512);
+  }
+  scene.add(flashlight);
+  scene.add(flashTarget);
 }
 
 /* ============================================================
-   INPUT — PC (pointer lock + keyboard)
+   INPUT — PC
    ============================================================ */
 document.addEventListener('pointerlockchange', () => {
   isLocked = document.pointerLockElement === renderer?.domElement;
-  if (!isLocked && State.running && !State.paused && !IS_TOUCH) openPause();
+  if (!isLocked && State.running && !State.paused && !IS_TOUCH && !State.introActive && !State.ending) openPause();
 });
 document.addEventListener('mousemove', (e) => {
   if (IS_TOUCH || !isLocked || !State.running || State.paused) return;
   const s = CFG.mouseSensBase * State.sensitivity;
   player.yaw -= e.movementX * s;
-  player.pitch = clamp(player.pitch - e.movementY * s, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
+  player.pitch -= e.movementY * s; // ВАЖНО: минус, как в стандартных FPS
+  player.pitch = clamp(player.pitch, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
 });
 document.addEventListener('keydown', (e) => {
   keys[e.code] = true;
@@ -984,6 +1390,7 @@ document.addEventListener('keydown', (e) => {
     if ($('#interact').classList.contains('show')) closeInteract();
     else tryInteract();
   }
+  if (e.code === 'KeyF') toggleFlashlight();
   if (e.code === 'KeyP') togglePhone();
   if (e.code === 'Escape') openPause();
 });
@@ -995,9 +1402,9 @@ function requestLock() {
 }
 
 /* ============================================================
-   INPUT — MOBILE (joystick + swipe look + buttons)
+   INPUT — MOBILE
    ============================================================ */
-const joy = { active: false, x: 0, y: 0, pointerId: null };
+const joy = { active: false, x: 0, y: 0, pointerId: null, baseX: 0, baseY: 0 };
 const look = { active: false, lastX: 0, lastY: 0, pointerId: null };
 
 function setupTouchControls() {
@@ -1011,17 +1418,13 @@ function setupTouchControls() {
   joyZone.addEventListener('pointerdown', (e) => {
     if (joy.active) return;
     joy.active = true; joy.pointerId = e.pointerId;
-    const r = joyBase.getBoundingClientRect();
-    // reposition base under finger
-    const size = 120;
-    const cx = clamp(e.clientX, 60 + 8, window.innerWidth - 300);
-    const cy = clamp(e.clientY, 60 + 8, window.innerHeight - 60);
+    const cx = clamp(e.clientX, 76, window.innerWidth * 0.5);
+    const cy = clamp(e.clientY, 76, window.innerHeight - 76);
     joyBase.style.left = (cx - 60) + 'px';
     joyBase.style.top = (cy - 60) + 'px';
     joyBase.style.bottom = 'auto';
     joyBase.classList.add('active');
-    joy.baseX = cx; joy.baseY = cy;
-    joy.x = 0; joy.y = 0;
+    joy.baseX = cx; joy.baseY = cy; joy.x = 0; joy.y = 0;
     joyZone.setPointerCapture(e.pointerId);
   });
   joyZone.addEventListener('pointermove', (e) => {
@@ -1041,7 +1444,6 @@ function setupTouchControls() {
   };
   joyZone.addEventListener('pointerup', endJoy);
   joyZone.addEventListener('pointercancel', endJoy);
-  joyZone.addEventListener('pointerleave', endJoy);
 
   lookZone.addEventListener('pointerdown', (e) => {
     if (look.active) return;
@@ -1057,7 +1459,8 @@ function setupTouchControls() {
     look.lastX = e.clientX; look.lastY = e.clientY;
     const s = CFG.touchSensBase * State.sensitivity;
     player.yaw -= dx * s;
-    player.pitch = clamp(player.pitch - dy * s, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
+    player.pitch -= dy * s; // тот же знак, что и на ПК
+    player.pitch = clamp(player.pitch, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
   });
   const endLook = (e) => {
     if (e.pointerId !== look.pointerId) return;
@@ -1070,18 +1473,24 @@ function setupTouchControls() {
     if ($('#interact').classList.contains('show')) closeInteract();
     else tryInteract();
   });
+  $('#btn-mob-flashlight').addEventListener('click', toggleFlashlight);
   $('#btn-mob-phone').addEventListener('click', togglePhone);
   $('#btn-mob-pause').addEventListener('click', openPause);
   $('#pause-btn').addEventListener('click', openPause);
 }
 
 /* ============================================================
-   PLAYER UPDATE
+   PLAYER UPDATE — починено
    ============================================================ */
 function updatePlayer(dt) {
+  if (!State.running || State.paused) return;
+
   let mx = 0, mz = 0;
   if (IS_TOUCH) {
     mx = joy.x; mz = joy.y;
+    // dead zone
+    if (Math.abs(mx) < 0.12) mx = 0;
+    if (Math.abs(mz) < 0.12) mz = 0;
   } else {
     if (keys['KeyW']) mz -= 1;
     if (keys['KeyS']) mz += 1;
@@ -1090,19 +1499,76 @@ function updatePlayer(dt) {
   }
   const len = Math.hypot(mx, mz);
   if (len > 1) { mx /= len; mz /= len; }
-  const speed = (keys['ShiftLeft'] ? CFG.runSpeed : CFG.moveSpeed);
-  const sin = Math.sin(player.yaw), cos = Math.cos(player.yaw);
-  const wx = mx * cos - mz * sin;
-  const wz = mx * sin + mz * cos;
-  player.pos.x = clamp(player.pos.x + wx * speed * dt, -5.6, 5.6);
-  player.pos.z = clamp(player.pos.z + wz * speed * dt, -4.6, 4.6);
 
-  const moving = Math.abs(mx) + Math.abs(mz) > 0.05;
+  const speed = keys['ShiftLeft'] ? CFG.runSpeed : CFG.moveSpeed;
+  // Сглаживание: цель → ускорение
+  const targetVx = mx * speed;
+  const targetVz = mz * speed;
+  player.vel.x += (targetVx - player.vel.x) * Math.min(1, dt * 12);
+  player.vel.y += (targetVz - player.vel.y) * Math.min(1, dt * 12);
+
+  const sin = Math.sin(player.yaw), cos = Math.cos(player.yaw);
+  const wx = player.vel.x * cos - player.vel.y * sin;
+  const wz = player.vel.x * sin + player.vel.y * cos;
+
+  player.pos.x += wx * dt;
+  player.pos.z += wz * dt;
+
+  // Коллизии по комнатам: ограничим по «допустимым» прямоугольникам
+  const allowed = [
+    { x: [-5.6, 5.6], z: [-4.6, 2.6] },   // морг
+    { x: [5.9, 9.6],  z: [-0.1, 2.1] },   // коридор (узкий)
+    { x: [9.9, 17.6], z: [-3.6, 3.6] },   // крематорий
+  ];
+  const ok = allowed.some(r => player.pos.x >= r.x[0] && player.pos.x <= r.x[1] && player.pos.z >= r.z[0] && player.pos.z <= r.z[1]);
+  if (!ok) {
+    // откат
+    player.pos.x -= wx * dt;
+    player.pos.z -= wz * dt;
+    player.vel.set(0, 0);
+  }
+
+  const moving = Math.abs(player.vel.x) + Math.abs(player.vel.y) > 0.3;
   const t = clock.elapsedTime;
-  const bob = moving ? Math.sin(t * 8) * 0.03 : 0;
+  const bob = moving ? Math.sin(t * (speed > 4 ? 11 : 8)) * 0.03 : 0;
+
+  camera.rotation.order = 'YXZ'; // ЖЁСТКО каждый кадр
   camera.position.set(player.pos.x, 1.6 + bob, player.pos.z);
   camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
+
+  // фонарик следует за камерой
+  updateFlashlight(dt);
+}
+
+function updateFlashlight(dt) {
+  if (!flashlight) return;
+  // позиция — чуть правее камеры
+  const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+  flashlight.position.copy(camera.position).add(right.multiplyScalar(0.15));
+  flashlight.position.y -= 0.1;
+  // цель — перед камерой
+  const forward = new THREE.Vector3(-Math.sin(player.yaw) * Math.cos(player.pitch), Math.sin(player.pitch), -Math.cos(player.yaw) * Math.cos(player.pitch));
+  flashTarget.position.copy(camera.position).add(forward.multiplyScalar(3));
+
+  if (State.flashlightOn && State.flashlightBattery > 0) {
+    flashlight.intensity = 2.6 + Math.sin(clock.elapsedTime * 30) * 0.05;
+    State.flashlightBattery -= CFG.flashlightDrain * dt;
+    if (State.flashlightBattery < 0) State.flashlightBattery = 0;
+  } else {
+    flashlight.intensity = 0;
+    State.flashlightBattery = Math.min(1, State.flashlightBattery + CFG.flashlightRecharge * dt);
+  }
+  $('#flashlight-batt').style.width = `${State.flashlightBattery * 100}%`;
+  $('#flashlight-ind').classList.toggle('on', State.flashlightOn && State.flashlightBattery > 0);
+  $('#flashlight-ind').classList.toggle('low', State.flashlightBattery < 0.2);
+  $('#btn-mob-flashlight').classList.toggle('on', State.flashlightOn);
+}
+
+function toggleFlashlight() {
+  State.flashlightOn = !State.flashlightOn;
+  vibrate(20);
+  if (State.flashlightOn && State.flashlightBattery <= 0) toast('Батарея разряжена', 1500);
 }
 
 /* ============================================================
@@ -1116,17 +1582,26 @@ function updateTargeting() {
   raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
   const hits = raycaster.intersectObjects(interactiveObjects, false);
   const cross = $('#crosshair'); const prompt = $('#prompt');
+
   if (hits.length > 0) {
     const action = hits[0].object.userData.action;
     cross.classList.add('hot');
     State._hovered = action;
-    if (action.type === 'corpse') {
-      prompt.textContent = `[${IS_TOUCH ? 'E' : 'E'}] Осмотреть труп #${action.index + 1}`;
-      State.activeCorpse = action.index;
-      $('#task-panel').classList.add('show');
-      refreshTaskPanel();
+
+    if (action.type === 'fridge') {
+      const cell = drawerMeshes[action.index];
+      const corpse = State.corpses[action.index];
+      if (!corpse) {
+        prompt.textContent = 'Пусто';
+      } else if (!corpse.drawnOut) {
+        prompt.textContent = '[E] Открыть ячейку и выкатить каталку';
+      } else if (!corpse.returned) {
+        prompt.textContent = '[E] Осмотреть (уже выкачен)';
+      } else {
+        prompt.textContent = '[E] Ячейка закрыта';
+      }
     } else if (action.type === 'cremator') {
-      prompt.textContent = State.demonBurned ? 'Крематор использован' : '[E] Активировать крематор';
+      prompt.textContent = State.demonBurned ? 'Печь использована' : '[E] Загрузить тело в печь';
     }
     prompt.classList.add('show');
     if (IS_TOUCH) $('#btn-mob-interact').classList.remove('disabled');
@@ -1140,19 +1615,57 @@ function updateTargeting() {
 function tryInteract() {
   const action = State._hovered;
   if (!action) return;
-  if (action.type === 'corpse') openCorpsePanel(action.index);
-  else if (action.type === 'cremator') triggerCremator();
+  if (action.type === 'fridge') {
+    if ($('#interact').classList.contains('show')) return;
+    handleFridge(action.index);
+  } else if (action.type === 'cremator') {
+    handleCremator();
+  }
 }
 
 /* ============================================================
-   CORPSE PANEL   ============================================================ */
+   FRIDGE / CORPSE FLOW
+   ============================================================ */
+function handleFridge(index) {
+  const corpse = State.corpses[index];
+  if (!corpse) { toast('Эта ячейка пуста.', 1500); return; }
+  if (!corpse.drawnOut) {
+    // выкатить
+    corpse.drawnOut = true;
+    const cell = drawerMeshes[index];
+    cell.busyLight.material.color.set(0xff3300);
+    // открыть дверцу
+    cell.doorPivot.rotation.y = -Math.PI / 2;
+    // показать каталку с трупом
+    if (gurney) {
+      gurney.visible = true;
+      const gurneyPos = new THREE.Vector3(5, 0, 0);
+      gurney.position.set(gurneyPos.x, 0, gurneyPos.z);
+      // если есть труп-меш у ячейки, переносим на каталку
+      const mesh = corpseMeshes[index];
+      if (mesh) {
+        scene.remove(mesh.parent); // убираем со стены
+        gurney.add(mesh);
+        mesh.position.set(0, 0.96, 0);
+      }
+    }
+    vibrate(30);
+    toast('Труп выкачен. Подойди к каталке и нажми E.', 2400);
+    // подсказка — сдвигаем цель на каталку
+  } else {
+    // уже выкачен — открыть осмотр
+    openCorpsePanel(index);
+  }
+}
+
 function openCorpsePanel(index) {
   const corpse = State.corpses[index];
   if (!corpse) return;
   State.activeCorpse = index;
   $('#interact-title').textContent = `Труп #${index + 1}`;
   $('#interact-sub').textContent = corpse.tasksDone.size === TASKS_DEF.length
-    ? 'Все процедуры выполнены.' : 'Выберите процедуру.';
+    ? 'Все процедуры выполнены. Верни каталку в ячейку.'
+    : 'Выберите процедуру.';
   const actionsEl = $('#interact-actions'); actionsEl.innerHTML = '';
   const resultEl = $('#interact-result');
   resultEl.textContent = '—'; resultEl.className = 'result';
@@ -1165,9 +1678,39 @@ function openCorpsePanel(index) {
     btn.addEventListener('click', () => doTask(corpse, task, resultEl));
     actionsEl.appendChild(btn);
   }
+  // кнопка «вернуть в ячейку» если всё готово
+  if (corpse.tasksDone.size === TASKS_DEF.length && !corpse.returned) {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.style.borderColor = 'var(--warn)';
+    btn.innerHTML = 'Вернуть каталку в ячейку<small>Обязательный шаг перед кремацией</small>';
+    btn.addEventListener('click', () => returnToFridge(index, resultEl));
+    actionsEl.appendChild(btn);
+  }
+
   $('#interact').classList.add('show');
   State.paused = true;
   if (!IS_TOUCH) document.exitPointerLock?.();
+}
+
+function returnToFridge(index, resultEl) {
+  const corpse = State.corpses[index];
+  corpse.returned = true;
+  const cell = drawerMeshes[index];
+  cell.busyLight.material.color.set(0x22aa44);
+  cell.doorPivot.rotation.y = 0;
+  if (gurney) gurney.visible = false;
+  const mesh = corpseMeshes[index];
+  if (mesh && mesh.parent === gurney) {
+    gurney.remove(mesh);
+    cell.group.add(mesh);
+    mesh.position.set(0, 0, 0);
+  }
+  resultEl.textContent = 'Каталка возвращена. Теперь тело готово к кремации.';
+  resultEl.className = 'result ok';
+  $('#interact-actions').innerHTML = '<div style="color:var(--ok);padding:12px 0;">✓ Готово. Закрой панель и иди к печи.</div>';
+  refreshTaskPanel();
+  vibrate(20);
 }
 
 function closeInteract() {
@@ -1200,7 +1743,7 @@ function doTask(corpse, task, resultEl) {
       else { message = `Бирка совпадает: №${corpse.tagNumber}.`; cls = 'ok'; }
       break;
     case 'blood':
-      if (corpse.isDemon) { message = 'Кровь тёплая и не сворачивается. Это невозможно.'; cls = 'danger'; if (Math.random() < 0.7) revealAnomaly(corpse); }
+      if (corpse.isDemon) { message = 'Кровь тёплая и не сворачивается. Невозможно.'; cls = 'danger'; if (Math.random() < 0.7) revealAnomaly(corpse); }
       else { message = 'Кровь тёмная, свернувшаяся — норма.'; cls = 'ok'; }
       break;
     case 'anomaly':
@@ -1214,12 +1757,24 @@ function doTask(corpse, task, resultEl) {
   const btns = $('#interact-actions').querySelectorAll('.action-btn');
   if (btns[idx]) btns[idx].disabled = true;
   refreshTaskPanel();
-  if (corpse.tasksDone.size === TASKS_DEF.length) {
+  vibrate(15);
+
+  if (corpse.tasksDone.size === TASKS_DEF.length && !corpse.returned) {
     setTimeout(() => {
-      resultEl.textContent = corpse.anomalies.length === 0
-        ? 'Все процедуры выполнены. Аномалий нет. Можно к крематору.'
-        : `Процедуры завершены. Аномалий: ${corpse.anomalies.length}. Возможно, это демон.`;
-    }, 2200);
+      if (corpse.anomalies.length === 0) {
+        resultEl.textContent = 'Процедуры завершены. Аномалий нет. Верни каталку в ячейку.';
+      } else {
+        resultEl.textContent = `Процедуры завершены. Аномалий: ${corpse.anomalies.length}. Верни каталку и решай.`;
+      }
+      // добавим кнопку возврата
+      const actionsEl = $('#interact-actions');
+      const btn = document.createElement('button');
+      btn.className = 'action-btn';
+      btn.style.borderColor = 'var(--warn)';
+      btn.innerHTML = 'Вернуть каталку в ячейку<small>Обязательный шаг</small>';
+      btn.addEventListener('click', () => returnToFridge(corpse.id, resultEl));
+      actionsEl.appendChild(btn);
+    }, 1800);
   }
 }
 
@@ -1229,6 +1784,7 @@ function revealAnomaly(corpse) {
   const a = pick(avail);
   corpse.anomalies.push(a.id);
   toast(`Аномалия: ${a.text}`, 3500);
+  vibrate(80);
 }
 
 /* ============================================================
@@ -1236,8 +1792,10 @@ function revealAnomaly(corpse) {
    ============================================================ */
 function refreshTaskPanel() {
   const list = $('#task-list'); list.innerHTML = '';
+  const stateEl = $('#corpse-state');
   if (State.activeCorpse == null) {
-    list.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Подойдите к трупу и нажмите [E]</div>';
+    list.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Подойди к ячейке и нажми E</div>';
+    stateEl.textContent = '—';
     return;
   }
   const c = State.corpses[State.activeCorpse];
@@ -1254,31 +1812,43 @@ function refreshTaskPanel() {
   an.style.color = c.anomalies.length > 0 ? 'var(--danger)' : 'var(--text-dim)';
   an.textContent = `Аномалий: ${c.anomalies.length}`;
   list.appendChild(an);
+
+  let statusText = '';
+  if (c.returned) statusText = '✓ В ячейке, готов к печи';
+  else if (c.drawnOut) statusText = 'На каталке';
+  else statusText = 'В ячейке';
+  stateEl.textContent = statusText;
 }
 $('#task-close').addEventListener('click', () => $('#task-panel').classList.remove('show'));
 
 /* ============================================================
    CREMATOR
    ============================================================ */
-function triggerCremator() {
-  if (State.demonBurned) { toast('Крематор уже использован.', 2000); return; }
-  const ready = State.corpses.findIndex(c => c.tasksDone.size === TASKS_DEF.length);
-  if (ready === -1) { toast('Нет готового тела. Выполните все процедуры.', 2600); return; }
+function handleCremator() {
+  if (State.demonBurned) { toast('Печь уже использована.', 2000); return; }
+  const ready = State.corpses.findIndex(c => c.returned && c.tasksDone.size === TASKS_DEF.length);
+  if (ready === -1) { toast('Нет тела в ячейке с завершёнными процедурами. Верни каталку.', 2800); return; }
+
   crematorWhoosh();
-  const grp = scene.userData.crematorGroup;
-  if (grp) grp.userData.indicator.material.color.set(0xff2222);
-  const cl = scene.userData.crematorLight;
-  if (cl) { cl.intensity = 3; cl.color.set(0xff3300); }
+  vibrate([40, 30, 60]);
+  const corpse = State.corpses[ready];
+
+  // открыть дверцу
+  if (crematorGroup) crematorGroup.doorPivot.rotation.y = -Math.PI / 2;
+  if (crematorLight) { crematorLight.intensity = 4; crematorLight.color.set(0xff3300); }
+  if (crematorGroup && crematorGroup.fire) crematorGroup.fire.visible = true;
+  if (crematorGroup) crematorGroup.window_.material.color.set(0xff3300);
+  $('#fx-flash').classList.add('on');
+  setTimeout(() => $('#fx-flash').classList.remove('on'), 90);
 
   setTimeout(() => {
-    const corpse = State.corpses[ready];
     if (corpse.isDemon) {
       State.demonBurned = true;
       endNight('demon_burned');
     } else {
       endNight('wrong_burn');
     }
-  }, 2200);
+  }, 2500);
 }
 
 /* ============================================================
@@ -1287,73 +1857,251 @@ function triggerCremator() {
 function togglePhone() { $('#phone').classList.toggle('open'); }
 $('#phone-close').addEventListener('click', () => $('#phone').classList.remove('open'));
 
-function pushMessage(who, text) {
+function pushMessage(who, text, glitch = false) {
   const msgs = $('#ph-msgs');
   const div = document.createElement('div');
-  div.className = `msg ${who}`;
+  div.className = `msg ${who}${glitch ? ' glitch' : ''}`;
   div.innerHTML = `<div class="who">${who === 'mark' ? 'МАРК' : 'ВЫ'}</div>${text}`;
   msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
-  if (!$('#phone').classList.contains('open')) toast('SMS от Марка', 1800);
+  if (!$('#phone').classList.contains('open')) {
+    toast(glitch ? '⚠ НЕИЗВЕСТНЫЙ ОТПРАВИТЕЛЬ' : 'SMS от Марка', 1800);
+    vibrate(glitch ? [60,40,60] : 25);
+  }
+}
+
+/* ============================================================
+   HORROR: SCARES, WHISPERS, BREATH, FLICKER
+   ============================================================ */
+function triggerScare() {
+  if (!State.running || State.paused) return;
+  const face = pick(['☠', '👁', '💀', '👤', '⛧', '🩸']);
+  $('#scare-face').textContent = face;
+  $('#scare-overlay').classList.add('show');
+  $('#fx-flash').classList.add('on');
+  vibrate([120, 60, 120]);
+  playScareSound();
+  setTimeout(() => {
+    $('#scare-overlay').classList.remove('show');
+    $('#fx-flash').classList.remove('on');
+  }, 500);
+}
+
+function flickerLights(strength = 1) {
+  const dur = 300 + Math.random() * 400;
+  const start = performance.now();
+  const originals = lights.map(l => l.intensity);
+  const step = () => {
+    const t = (performance.now() - start) / dur;
+    if (t >= 1) { lights.forEach((l, i) => l.intensity = originals[i]); return; }
+    lights.forEach((l, i) => l.intensity = originals[i] * (Math.random() < 0.4 ? 0.1 * strength : 1));
+    requestAnimationFrame(step);
+  };
+  step();
+}
+
+function horrorTick(dt) {
+  if (!State.running || State.paused || State.introActive) return;
+  if (State.scareMode === 'off') return;
+
+  State.scareTimer -= dt;
+  if (State.scareTimer <= 0) {
+    const rate = DIFFICULTY[State.difficulty].scareRate;
+    const modeMul = State.scareMode === 'low' ? 2 : 1;
+    State.scareTimer = (1 / rate) * modeMul * rand(0.6, 1.4);
+    // Случайное событие
+    const roll = Math.random();
+    if (roll < 0.35) triggerScare();
+    else if (roll < 0.6) flickerLights(1);
+    else if (roll < 0.85) playWhisper();
+    else {
+      // SMS-глитч
+      pushMessage('mark', pick(SCARE_TEXTS), true);
+    }
+  }
+
+  // Второй ночью — «дыхание за спиной» и пульс экрана
+  if (State.night === 2) {
+    const demonAlive = State.corpses.some(c => c.isDemon) && !State.demonBurned;
+    if (demonAlive) {
+      // лёгкое мерцание ламп
+      lights.forEach(l => {
+        l.intensity *= (0.92 + Math.sin(clock.elapsedTime * 17) * 0.08);
+      });
+      // виньетка усиливается
+      $('#fx-blood').classList.add('danger');
+      // шёпот периодически
+      State.demonPulse += dt;
+      if (State.demonPulse > 8) {
+        State.demonPulse = 0;
+        playWhisper();
+      }
+    }
+  }
 }
 
 /* ============================================================
    NIGHT FLOW
    ============================================================ */
 function startNight(n) {
-  State.night = n; State.running = true; State.paused = false;
+  State.night = n;
+  State.running = false; // запустим после интро
+  State.paused = false;
+  State.introActive = true;
   State.timeLeft = CFG.nightDuration[State.difficulty];
   State.demonBurned = false; State.ending = null;
   State.corpses = []; State.activeCorpse = null;
-  player.pos.set(0, 1.6, 3.8); player.yaw = 0; player.pitch = 0;
+  State.flashlightOn = State.flashOnStart === 'on';
+  State.flashlightBattery = 1;
+  State.scareTimer = 15;
+  State.demonPulse = 0;
+  State._hovered = null;
 
-  const grp = scene.userData.crematorGroup;
-  if (grp) grp.userData.indicator.material.color.set(0x3a1a1a);
-  const cl = scene.userData.crematorLight;
-  if (cl) { cl.intensity = 0; cl.color.set(0xff5533); }
-
+  // сброс комнат
+  resetWorldObjects();
   generateCorpses();
   updateHUD();
-  $('#hud').classList.add('active');
-  $('#task-panel').classList.add('show');
-  $('#ph-msgs').innerHTML = '';
-  $('#phone').classList.remove('open');
-  if (!IS_TOUCH) requestLock();
 
-  setTimeout(() => {
-    pushMessage('mark', n === 1
-      ? 'Смена началась. Осмотри тела сам, я скоро вернусь.'
-      : 'Меня не будет. Один из трупов — не человек. Сожги его до рассвета.');
-    if (n === 2) setTimeout(() =>
-      pushMessage('mark', 'Не ошибись. Сожжёшь невинного — демон вырвется.'), 6000);
-  }, 2500);
+  // интро-анимация
+  showNightIntro(n, () => {
+    State.running = true;
+    State.introActive = false;
+    $('#hud').classList.add('active');
+    $('#task-panel').classList.add('show');
+    $('#ph-msgs').innerHTML = '';
+    $('#phone').classList.remove('open');
+    if (!IS_TOUCH) requestLock();
+
+    setTimeout(() => {
+      pushMessage('mark', n === 1
+        ? 'Смена началась. Тела в холодильниках. Выкати, осмотри, верни — и только потом в печь.'
+        : 'Меня нет. Один из трупов — не человек. Сожги его до рассвета. Я буду на связи.');
+      if (n === 2) setTimeout(() => pushMessage('mark', 'Не ошибись. Сожжёшь невинного — демон вырвется.'), 6000);
+    }, 2000);
+  });
 
   ensureLoop();
 }
 
+function resetWorldObjects() {
+  // сброс ячеек
+  for (const cell of drawerMeshes) {
+    if (!cell) continue;
+    cell.doorPivot.rotation.y = 0;
+    cell.busyLight.material.color.set(0x222222);
+    cell.open = false;
+    if (cell.corpse) {
+      cell.group.remove(cell.corpse);
+      cell.corpse = null;
+    }
+  }
+  // сброс мешей трупов
+  for (const m of corpseMeshes) {
+    if (m && m.parent) m.parent.remove(m);
+  }
+  corpseMeshes = [];
+  // каталка
+  if (gurney) gurney.visible = false;
+  // печь
+  if (crematorGroup) {
+    crematorGroup.doorPivot.rotation.y = 0;
+    crematorGroup.window_.material.color.set(0x110000);
+    if (crematorGroup.fire) crematorGroup.fire.visible = false;
+  }
+  if (crematorLight) { crematorLight.intensity = 0; crematorLight.color.set(0xff4400); }
+  $('#fx-blood').classList.remove('danger');
+}
+
 function generateCorpses() {
-  const idxs = shuffle([0, 1, 2]);
-  const demonIndex = idxs[0];
+  // Демон всегда один из трёх. Трупы распределены по 3 из 6 ячеек.
+  const cellIdx = shuffle([0, 1, 2, 3, 4, 5]).slice(0, 3);
+  const demonPos = Math.floor(Math.random() * 3); // индекс среди трупов
+
   State.corpses = [];
   for (let i = 0; i < 3; i++) {
-    const isDemon = i === demonIndex;
+    const isDemon = i === demonPos;
     const numAnomalies = isDemon ? DIFFICULTY[State.difficulty].anomaliesCount : 0;
     const pool = shuffle(ANOMALY_POOL);
-    State.corpses.push({
-      id: i, isDemon,
+    const cellIndex = cellIdx[i];
+    State.corpses[i] = {
+      id: i,
+      cellIndex,
+      isDemon,
       anomalies: isDemon ? pool.slice(0, numAnomalies).map(a => a.id) : [],
       tagNumber: 1000 + i * 37,
       tagMismatch: isDemon && Math.random() < 0.6,
       tasksDone: new Set(),
-    });
+      drawnOut: false,
+      returned: false,
+      burned: false,
+    };
+    // разместим меш трупа внутри ячейки
+    const mesh = buildCorpseMesh(i);
+    const cell = drawerMeshes[cellIndex];
+    if (cell) {
+      cell.group.add(mesh);
+      mesh.position.set(0, 0, -0.15);
+      cell.corpse = mesh;
+      cell.busyLight.material.color.set(0x8a2a2a); // занято
+    }
+    corpseMeshes[i] = mesh;
   }
   refreshTaskPanel();
+}
+
+function buildCorpseMesh(index) {
+  const g = new THREE.Group();
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xb8b8ac, roughness: 0.9 });
+  // тело лежит горизонтально
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 1.1, 4, 10), skinMat);
+  torso.rotation.z = Math.PI / 2;
+  torso.castShadow = State.quality === 'high';
+  g.add(torso);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), skinMat);
+  head.position.set(-0.75, 0.02, 0); g.add(head);
+  // глаза
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  for (const dz of [-0.06, 0.06]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), eyeMat);
+    eye.position.set(-0.86, 0.05, dz); g.add(eye);
+  }
+  // конечности
+  for (const dz of [-0.12, 0.12]) {
+    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.9, 3, 6), skinMat);
+    leg.rotation.z = Math.PI / 2; leg.position.set(0.95, -0.05, dz); g.add(leg);
+  }
+  for (const dz of [-0.3, 0.3]) {
+    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.8, 3, 6), skinMat);
+    arm.rotation.z = Math.PI / 2; arm.position.set(-0.15, 0.02, dz); g.add(arm);
+  }
+  skinMat.color.offsetHSL(rand(-0.03, 0.03), rand(-0.05, 0.05), rand(-0.05, 0.05));
+  g.rotation.y = rand(-0.05, 0.05);
+  g.userData.skinMat = skinMat;
+  return g;
 }
 
 function updateHUD() {
   $('#hud-night').textContent = `НОЧЬ ${State.night}`;
   $('#hud-objective').textContent = State.night === 1
-    ? 'Осмотрите тела. Выполните процедуры.'
-    : 'Найдите демона. Сожгите до рассвета.';
+    ? 'Осмотри тела. Выполни процедуры. Верни в ячейки.'
+    : 'Найди демона. Сожги до рассвета.';
+}
+
+/* ---------- NIGHT INTRO ---------- */
+function showNightIntro(n, onDone) {
+  const intro = $('#night-intro');
+  const num = $('#night-intro-num');
+  const quote = $('#night-intro-quote');
+  num.textContent = n;
+  quote.textContent = n === 1
+    ? 'Тишина. Только гул ламп и запах формалина.'
+    : 'Марк не придёт. Ты один. И что-то уже не спит.';
+  intro.classList.add('show');
+  vibrate([30, 20, 30]);
+  playWhisper();
+  setTimeout(() => {
+    intro.classList.remove('show');
+    onDone();
+  }, 4200);
 }
 
 /* ============================================================
@@ -1368,29 +2116,32 @@ function endNight(reason) {
   if (State.night === 1) {
     title.textContent = 'НОЧЬ 1 ПРОЙДЕНА'; title.className = 'ending-title neutral';
     text.textContent = 'Вы выполнили процедуры. Марк ушёл. Завтра — ночь 2.';
-    hint.textContent = 'Автопереход через 5 секунд...';
+    hint.textContent = 'Автопереход через 6 секунд...';
     $('#ending').classList.add('show');
     setTimeout(() => {
       $('#ending').classList.remove('show');
       startNight(2);
-    }, 5000);
+    }, 6000);
     return;
   }
 
   if (reason === 'demon_burned') {
     title.textContent = 'РАССВЕТ'; title.className = 'ending-title good';
-    text.textContent = 'Демон сожжён. Угли остывают. Марк пишет: «Жив. Хорошо.» Вы выжили.';
+    text.textContent = 'Демон сожжён. Угли остывают. Марк пишет: «Жив. Хорошо.» Ты выжил.';
     hint.textContent = 'Хорошая концовка.';
   } else if (reason === 'wrong_burn') {
     title.textContent = 'ДЕМОН ВЫРВАЛСЯ'; title.className = 'ending-title bad';
-    text.textContent = 'Вы сожгли невинного. Демон вырвался и забрал вас.';
+    text.textContent = 'Ты сжёг невинного. Демон вырвался и забрал тебя.';
     hint.textContent = 'Внимательнее с аномалиями.';
+    setTimeout(() => triggerScare(), 300);
   } else if (reason === 'timeout') {
     title.textContent = 'ВРЕМЯ ВЫШЛО'; title.className = 'ending-title bad';
-    text.textContent = 'Рассвет не наступил. Демон поглотил вас в темноте.';
+    text.textContent = 'Рассвет не наступил. Демон поглотил тебя в темноте.';
     hint.textContent = 'Быстрее в следующий раз.';
+    setTimeout(() => triggerScare(), 300);
   }
   $('#ending').classList.add('show');
+  vibrate([80, 40, 120]);
 }
 
 $('#btn-ending-retry').addEventListener('click', () => {
@@ -1409,7 +2160,7 @@ $('#btn-ending-menu').addEventListener('click', () => {
    PAUSE
    ============================================================ */
 function openPause() {
-  if (!State.running) return;
+  if (!State.running || State.introActive) return;
   State.paused = true;
   if (!IS_TOUCH) document.exitPointerLock?.();
   $('#modal-pause').classList.add('show');
@@ -1441,6 +2192,7 @@ function initAudio() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = audioCtx.createGain(); masterGain.gain.value = State.volume;
     masterGain.connect(audioCtx.destination);
+    // гул
     const o1 = audioCtx.createOscillator(), g1 = audioCtx.createGain();
     o1.type = 'sine'; o1.frequency.value = 55; g1.gain.value = 0.03;
     o1.connect(g1).connect(masterGain); o1.start();
@@ -1466,8 +2218,47 @@ function crematorWhoosh() {
   src.start(); src.stop(audioCtx.currentTime + 2.3);
 }
 
+function playWhisper() {
+  if (!audioCtx) return;
+  const dur = 1.5 + Math.random();
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random()*2-1) * 0.15;
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.4);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  const f = audioCtx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1200 + Math.random() * 800; f.Q.value = 3;
+  src.connect(f).connect(g).connect(masterGain);
+  src.start(); src.stop(audioCtx.currentTime + dur);
+}
+
+function playScareSound() {
+  if (!audioCtx) return;
+  const dur = 0.8;
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  const f = audioCtx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 500;
+  src.connect(f).connect(g).connect(masterGain);
+  src.start(); src.stop(audioCtx.currentTime + dur);
+  // резкий писк
+  const osc = audioCtx.createOscillator(); const og = audioCtx.createGain();
+  osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2000, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.5);
+  og.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  og.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+  osc.connect(og).connect(masterGain);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+}
+
 /* ============================================================
-   MAIN LOOP — single, always running
+   MAIN LOOP
    ============================================================ */
 function ensureLoop() {
   if (animStarted) return;
@@ -1475,7 +2266,9 @@ function ensureLoop() {
   const loop = () => {
     requestAnimationFrame(loop);
     const dt = Math.min(clock.getDelta(), 0.05);
-    if (State.running && !State.paused && !State.ending) {
+
+    if (State.running && !State.paused && !State.introActive && !State.ending) {
+      // таймер
       State.timeLeft -= dt;
       const tEl = $('#hud-timer');
       tEl.textContent = formatTime(State.timeLeft);
@@ -1484,16 +2277,29 @@ function ensureLoop() {
         if (State.night === 2) endNight('timeout');
         else State.timeLeft = 0;
       }
+
       updatePlayer(dt);
       updateTargeting();
+      horrorTick(dt);
+
+      // анимация огня печи
+      if (crematorGroup && crematorGroup.fire && crematorGroup.fire.visible) {
+        crematorGroup.fire.children.forEach((p, i) => {
+          p.scale.y = 0.8 + Math.sin(clock.elapsedTime * 8 + p.userData.phase) * 0.2;
+          p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime * 5 + p.userData.phase) * 0.1;
+          p.material.opacity = 0.7 + Math.sin(clock.elapsedTime * 12 + i) * 0.2;
+        });
+        if (crematorLight) crematorLight.intensity = 3 + Math.sin(clock.elapsedTime * 20) * 1;
+      }
     }
+
     renderer.render(scene, camera);
   };
   loop();
 }
 
 /* ============================================================
-   PORTRAIT CHECK (mobile only)
+   ORIENTATION (mobile)
    ============================================================ */
 function checkOrientation() {
   if (!IS_TOUCH) return;
@@ -1510,9 +2316,10 @@ window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 
   checkOrientation();
   initThree();
   setupTouchControls();
-  ensureLoop(); // start render loop immediately, even in menu
-  camera.position.set(0, 1.6, 3.8);
+  ensureLoop();
+  camera.position.set(0, 1.6, 8);
+  camera.lookAt(0, 1.6, 0);
 })();
 </script>
 </body>
-</html>
+   </html>
