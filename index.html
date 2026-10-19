@@ -2,11 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#05070a" />
 <title>Морг: Ночь Демона</title>
 <style>
 /* ============================================================
-   GLOBAL / RESET
+   GLOBAL
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -19,93 +20,84 @@
   --ok: #4f9d6a;
   --warn: #c9a12e;
   --danger: #b83030;
-  --blood: #6a0f0f;
   --font-ui: 'Segoe UI', 'Roboto', system-ui, sans-serif;
 }
 html, body {
-  height: 100%;
-  overflow: hidden;
-  background: var(--bg-dark);
-  color: var(--text);
+  height: 100%; width: 100%; overflow: hidden;
+  background: var(--bg-dark); color: var(--text);
   font-family: var(--font-ui);
-  user-select: none;
+  user-select: none; -webkit-user-select: none;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
 }
 canvas { display: block; }
-button { font-family: inherit; cursor: pointer; border: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
 /* ============================================================
-   LOADING / BOOT
+   BOOT
    ============================================================ */
 #boot {
   position: fixed; inset: 0; z-index: 100;
   background: radial-gradient(circle at 50% 40%, #10151c 0%, #05070a 80%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 24px;
-  transition: opacity .8s ease;
+  gap: 24px; transition: opacity .8s ease;
 }
 #boot.hidden { opacity: 0; pointer-events: none; }
 #boot h1 {
-  font-size: clamp(20px, 4vw, 34px);
-  letter-spacing: .35em;
+  font-size: clamp(22px, 5vw, 34px); letter-spacing: .35em;
   color: var(--accent-bright);
   text-shadow: 0 0 22px rgba(201,48,48,.55);
   animation: flicker 3.5s infinite;
 }
 #boot p { color: var(--text-dim); font-size: 13px; letter-spacing: .2em; }
 .boot-bar { width: min(360px, 70vw); height: 3px; background: #1a2129; overflow: hidden; }
-.boot-bar > i {
-  display: block; height: 100%; width: 0%;
+.boot-bar > i { display: block; height: 100%; width: 0%;
   background: linear-gradient(90deg, var(--accent), var(--accent-bright));
-  transition: width .3s ease;
-}
+  transition: width .3s ease; }
 @keyframes flicker {
-  0%, 100% { opacity: 1; }
-  92% { opacity: 1; } 93% { opacity: .35; } 94% { opacity: 1; }
+  0%,92%,100% { opacity: 1; }
+  93% { opacity: .35; } 94% { opacity: 1; }
   97% { opacity: .6; } 98% { opacity: 1; }
 }
 
 /* ============================================================
-   MAIN MENU
+   MENU
    ============================================================ */
 #menu {
   position: fixed; inset: 0; z-index: 60;
-  background:
-    linear-gradient(180deg, rgba(5,7,10,.2), rgba(5,7,10,.92)),
+  background: linear-gradient(180deg, rgba(5,7,10,.2), rgba(5,7,10,.92)),
     radial-gradient(circle at 50% 30%, #141b23, #05070a 75%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 18px; padding: 24px;
-  opacity: 1; transition: opacity .6s ease;
+  gap: 14px; padding: 24px; overflow-y: auto;
+  transition: opacity .6s ease;
 }
 #menu.hidden { opacity: 0; pointer-events: none; }
 #menu .title {
-  font-size: clamp(28px, 6vw, 56px);
-  font-weight: 700; letter-spacing: .3em;
-  color: #e8ecef; text-transform: uppercase;
+  font-size: clamp(22px, 6vw, 56px); font-weight: 700; letter-spacing: .3em;
+  color: #e8ecef; text-transform: uppercase; text-align: center;
   text-shadow: 0 0 30px rgba(201,48,48,.4);
   animation: titlePulse 4s ease-in-out infinite;
-  text-align: center;
 }
 #menu .subtitle {
-  color: var(--text-dim); letter-spacing: .5em;
-  font-size: clamp(10px, 1.6vw, 13px); margin-bottom: 28px; text-transform: uppercase;
+  color: var(--text-dim); letter-spacing: .4em;
+  font-size: clamp(9px, 1.6vw, 13px); margin-bottom: 20px;
+  text-transform: uppercase; text-align: center;
 }
 @keyframes titlePulse {
   0%,100% { text-shadow: 0 0 30px rgba(201,48,48,.4); }
   50% { text-shadow: 0 0 45px rgba(201,48,48,.75); }
 }
 .menu-btn {
-  width: min(320px, 80vw); padding: 14px 20px;
-  background: rgba(20,26,33,.85);
-  color: var(--text); font-size: 15px; letter-spacing: .2em;
-  text-transform: uppercase;
-  border: 1px solid #2a333d;
-  position: relative; overflow: hidden;
+  width: min(320px, 84vw); padding: 14px 20px;
+  background: rgba(20,26,33,.85); color: var(--text);
+  font-size: 15px; letter-spacing: .2em; text-transform: uppercase;
+  border: 1px solid #2a333d; position: relative; overflow: hidden;
   transition: background .25s, border-color .25s, transform .15s;
 }
 .menu-btn::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: var(--accent-bright); transform: scaleY(0); transform-origin: center;
+  background: var(--accent-bright); transform: scaleY(0);
   transition: transform .25s ease;
 }
 .menu-btn:hover:not(:disabled) { background: rgba(40,20,24,.9); border-color: var(--accent); }
@@ -115,77 +107,78 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .menu-btn .hint { display:block; font-size: 10px; color: var(--text-dim); letter-spacing: .15em; margin-top: 4px; }
 
 /* ============================================================
-   MODALS (Settings / Difficulty / Pause / Endings)
+   MODALS
    ============================================================ */
 .modal {
   position: fixed; inset: 0; z-index: 80;
   display: none; align-items: center; justify-content: center;
-  background: rgba(3,5,8,.88);
-  backdrop-filter: blur(4px);
-  padding: 20px;
+  background: rgba(3,5,8,.88); backdrop-filter: blur(4px);
+  padding: 16px; overflow-y: auto;
 }
-.modal.show { display: flex; animation: modalIn .35s ease; }
+.modal.show { display: flex; animation: modalIn .3s ease; }
 @keyframes modalIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 .modal-panel {
-  width: min(560px, 100%);
-  max-height: 90vh; overflow-y: auto;
-  background: var(--bg-panel);
-  border: 1px solid #232c36;
-  padding: 28px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  width: min(560px, 100%); max-height: 90vh; overflow-y: auto;
+  background: var(--bg-panel); border: 1px solid #232c36;
+  padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,.7);
 }
 .modal-panel h2 {
-  font-size: 22px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--accent-bright); margin-bottom: 20px; text-align: center;
+  font-size: clamp(18px, 4vw, 22px); letter-spacing: .25em;
+  text-transform: uppercase; color: var(--accent-bright);
+  margin-bottom: 16px; text-align: center;
 }
 .modal-panel .row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 0; border-bottom: 1px solid #1a2129;
-  font-size: 14px;
+  padding: 10px 0; border-bottom: 1px solid #1a2129; font-size: 14px;
+  gap: 12px;
 }
 .modal-panel .row:last-of-type { border-bottom: none; }
-.modal-panel label { color: var(--text); }
 .modal-panel input[type=range] { width: 140px; accent-color: var(--accent-bright); }
 .modal-panel select {
   background: #05070a; color: var(--text); border: 1px solid #2a333d;
   padding: 6px 10px; font-size: 13px; font-family: inherit;
 }
-.modal-actions { display: flex; gap: 12px; justify-content: center; margin-top: 26px; flex-wrap: wrap; }
+.modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
 .difficulty-card {
-  border: 1px solid #2a333d; padding: 14px 18px; margin-bottom: 12px;
+  border: 1px solid #2a333d; padding: 12px 16px; margin-bottom: 10px;
   cursor: pointer; transition: border-color .2s, background .2s;
 }
 .difficulty-card:hover { border-color: var(--accent); background: rgba(60,20,24,.4); }
 .difficulty-card.selected { border-color: var(--accent-bright); background: rgba(90,20,24,.6); }
-.difficulty-card h3 { font-size: 16px; letter-spacing: .15em; margin-bottom: 4px; }
+.difficulty-card h3 { font-size: 15px; letter-spacing: .15em; margin-bottom: 4px; }
 .difficulty-card p { font-size: 12px; color: var(--text-dim); }
 
 /* ============================================================
-   HUD
+   HUD (base — works both PC/mobile)
    ============================================================ */
 #hud {
   position: fixed; inset: 0; z-index: 40; pointer-events: none;
   opacity: 0; transition: opacity .5s ease;
-  font-size: 13px; letter-spacing: .08em;
+  font-size: 13px; letter-spacing: .06em;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 #hud.active { opacity: 1; }
 #hud .top-left {
-  position: absolute; top: 18px; left: 18px;
-  background: rgba(5,7,10,.7); padding: 10px 14px; border-left: 3px solid var(--accent);
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(5,7,10,.75); padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  max-width: 60vw;
 }
-#hud .top-left .night { color: var(--accent-bright); font-weight: 700; letter-spacing: .2em; }
-#hud .top-left .objective { color: var(--text); margin-top: 6px; font-size: 12px; max-width: 340px; }
+#hud .top-left .night { color: var(--accent-bright); font-weight: 700; letter-spacing: .2em; font-size: 12px; }
+#hud .top-left .objective { color: var(--text); margin-top: 4px; font-size: 11px; line-height: 1.35; }
 #hud .top-right {
-  position: absolute; top: 18px; right: 18px; text-align: right;
-  background: rgba(5,7,10,.7); padding: 10px 14px; border-right: 3px solid var(--warn);
+  position: absolute; top: 12px; right: 12px; text-align: right;
+  background: rgba(5,7,10,.75); padding: 8px 12px;
+  border-right: 3px solid var(--warn);
 }
-#hud .timer { font-size: 22px; font-weight: 700; color: var(--warn); letter-spacing: .1em; }
+#hud .timer { font-size: 20px; font-weight: 700; color: var(--warn); letter-spacing: .08em; }
 #hud .timer.danger { color: var(--danger); animation: dangerPulse 1s infinite; }
 @keyframes dangerPulse { 50% { opacity: .5; } }
 #hud .bottom-center {
-  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-  text-align: center; color: var(--text-dim); font-size: 12px;
-  background: rgba(5,7,10,.7); padding: 8px 18px;
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  text-align: center; color: var(--text-dim); font-size: 11px;
+  background: rgba(5,7,10,.7); padding: 6px 14px;
+  max-width: 90vw;
 }
 #crosshair {
   position: absolute; top: 50%; left: 50%;
@@ -196,40 +189,46 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 #crosshair.hot { background: var(--accent-bright); transform: scale(1.6); }
 #prompt {
-  position: absolute; top: calc(50% + 22px); left: 50%; transform: translateX(-50%);
-  color: var(--text); font-size: 12px; background: rgba(5,7,10,.85);
-  padding: 6px 14px; border: 1px solid #2a333d; white-space: nowrap;
+  position: absolute; top: calc(50% + 22px); left: 50%;
+  transform: translateX(-50%);
+  color: var(--text); font-size: 12px;
+  background: rgba(5,7,10,.9); padding: 5px 12px;
+  border: 1px solid #2a333d; white-space: nowrap;
   opacity: 0; transition: opacity .2s;
 }
 #prompt.show { opacity: 1; }
 
 /* ============================================================
-   TASK PANEL (right side, corpse care)
+   TASK PANEL
    ============================================================ */
 #task-panel {
-  position: absolute; right: 18px; top: 110px;
-  width: 240px; background: rgba(5,7,10,.85);
-  border: 1px solid #232c36; padding: 14px;
+  position: absolute; right: 12px; top: 82px;
+  width: 220px; background: rgba(5,7,10,.88);
+  border: 1px solid #232c36; padding: 12px;
   opacity: 0; transform: translateX(20px);
   transition: opacity .3s, transform .3s;
+  pointer-events: none;
 }
 #task-panel.show { opacity: 1; transform: translateX(0); pointer-events: auto; }
-#task-panel h3 { font-size: 12px; letter-spacing: .2em; color: var(--accent-bright); margin-bottom: 10px; text-transform: uppercase; }
+#task-panel h3 { font-size: 11px; letter-spacing: .2em; color: var(--accent-bright); margin-bottom: 8px; text-transform: uppercase; }
 #task-panel .task {
-  display: flex; justify-content: space-between; padding: 6px 0;
-  border-bottom: 1px dashed #1a2129; font-size: 12px;
+  display: flex; justify-content: space-between; padding: 5px 0;
+  border-bottom: 1px dashed #1a2129; font-size: 11px;
+  gap: 6px;
 }
 #task-panel .task:last-child { border-bottom: none; }
 #task-panel .task.done { color: var(--ok); text-decoration: line-through; }
-#task-panel .task .tag { font-size: 10px; color: var(--text-dim); }
-#task-panel .close { position: absolute; top: 8px; right: 10px; color: var(--text-dim); background: none; font-size: 16px; }
+#task-panel .task .tag { font-size: 9px; color: var(--text-dim); }
+#task-panel .close { position: absolute; top: 6px; right: 8px; color: var(--text-dim); font-size: 16px; }
 
 /* ============================================================
-   PHONE (SMS)
+   PHONE
    ============================================================ */
 #phone {
-  position: fixed; z-index: 55; right: 18px; bottom: 18px;
-  width: 300px; max-height: 70vh; display: flex; flex-direction: column;
+  position: fixed; z-index: 55;
+  right: 12px; bottom: 12px;
+  width: min(300px, calc(100vw - 24px)); max-height: 60vh;
+  display: flex; flex-direction: column;
   background: #0a0f14; border: 1px solid #2a333d; border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0,0,0,.8);
   transform: translateY(120%); transition: transform .4s ease;
@@ -241,11 +240,10 @@ button { font-family: inherit; cursor: pointer; border: none; }
   display: flex; justify-content: space-between; align-items: center;
   color: var(--text-dim); font-size: 11px; letter-spacing: .15em;
 }
-#phone .ph-header .ph-close { background: none; color: var(--text-dim); font-size: 16px; }
 #phone .ph-msgs { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 #phone .msg {
-  padding: 8px 12px; border-radius: 10px; max-width: 85%;
-  line-height: 1.4; animation: msgIn .3s ease;
+  padding: 8px 12px; border-radius: 10px; max-width: 88%; line-height: 1.4;
+  animation: msgIn .3s ease; word-wrap: break-word;
 }
 #phone .msg.mark { background: #1a2530; align-self: flex-start; border-left: 3px solid var(--accent); }
 #phone .msg.me { background: #20303d; align-self: flex-end; }
@@ -253,79 +251,173 @@ button { font-family: inherit; cursor: pointer; border: none; }
 @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ============================================================
-   INTERACT MODAL (corpse care actions)
+   INTERACT MODAL
    ============================================================ */
 #interact {
-  position: fixed; inset: 0; z-index: 70; display: none;
-  align-items: center; justify-content: center;
-  background: rgba(3,5,8,.85); backdrop-filter: blur(3px); padding: 20px;
+  position: fixed; inset: 0; z-index: 70;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(3,5,8,.9); backdrop-filter: blur(3px);
+  padding: 16px;
 }
 #interact.show { display: flex; animation: modalIn .25s ease; }
 #interact .panel {
   width: min(560px, 100%); max-height: 88vh; overflow-y: auto;
-  background: var(--bg-panel); border: 1px solid #232c36; padding: 24px;
+  background: var(--bg-panel); border: 1px solid #232c36; padding: 20px;
 }
-#interact h3 { color: var(--accent-bright); letter-spacing: .2em; font-size: 16px; margin-bottom: 6px; }
-#interact .sub { color: var(--text-dim); font-size: 12px; margin-bottom: 18px; }
-#interact .actions { display: flex; flex-direction: column; gap: 8px; }
+#interact h3 { color: var(--accent-bright); letter-spacing: .2em; font-size: 15px; margin-bottom: 4px; }
+#interact .sub { color: var(--text-dim); font-size: 12px; margin-bottom: 14px; }
+#interact .actions { display: flex; flex-direction: column; gap: 6px; }
 #interact .action-btn {
-  text-align: left; padding: 12px 16px; background: #0a0f14;
-  border: 1px solid #232c36; color: var(--text);
-  transition: border-color .2s, background .2s;
+  text-align: left; padding: 11px 14px;
+  background: #0a0f14; border: 1px solid #232c36;
+  color: var(--text); transition: border-color .2s, background .2s;
   font-size: 13px;
 }
 #interact .action-btn:hover:not(:disabled) { border-color: var(--accent); background: #131a22; }
 #interact .action-btn:disabled { opacity: .4; cursor: not-allowed; }
-#interact .action-btn small { display: block; color: var(--text-dim); font-size: 11px; margin-top: 3px; }
-#interact .result { margin-top: 16px; padding: 12px; background: #0a0f14; border-left: 3px solid var(--warn); font-size: 13px; min-height: 40px; }
+#interact .action-btn small { display: block; color: var(--text-dim); font-size: 11px; margin-top: 2px; }
+#interact .result {
+  margin-top: 14px; padding: 10px;
+  background: #0a0f14; border-left: 3px solid var(--warn);
+  font-size: 13px; min-height: 40px; line-height: 1.4;
+}
 #interact .result.ok { border-left-color: var(--ok); }
 #interact .result.danger { border-left-color: var(--danger); }
-#interact .close-btn { margin-top: 18px; width: 100%; padding: 10px; background: #1a2129; color: var(--text); }
+#interact .close-btn {
+  margin-top: 14px; width: 100%; padding: 12px;
+  background: #1a2129; color: var(--text); font-size: 13px;
+  letter-spacing: .1em;
+}
 
 /* ============================================================
-   ENDING SCREEN
+   ENDING
    ============================================================ */
 #ending {
   position: fixed; inset: 0; z-index: 90; display: none;
   align-items: center; justify-content: center; flex-direction: column;
   background: radial-gradient(circle at 50% 40%, #0a0202, #000 80%);
-  padding: 30px; text-align: center; gap: 20px;
+  padding: 24px; text-align: center; gap: 16px;
+  overflow-y: auto;
 }
 #ending.show { display: flex; animation: modalIn .6s ease; }
 #ending .ending-title {
-  font-size: clamp(26px, 5vw, 46px); letter-spacing: .3em;
+  font-size: clamp(22px, 5vw, 46px); letter-spacing: .3em;
   text-transform: uppercase; font-weight: 700;
   animation: titlePulse 3s ease-in-out infinite;
 }
 #ending .ending-title.good { color: #5fbf7f; text-shadow: 0 0 30px rgba(95,191,127,.4); }
 #ending .ending-title.bad { color: var(--accent-bright); text-shadow: 0 0 30px rgba(201,48,48,.6); }
 #ending .ending-title.neutral { color: var(--warn); text-shadow: 0 0 30px rgba(201,161,46,.4); }
-#ending .ending-text { max-width: 600px; color: var(--text); line-height: 1.7; font-size: 15px; }
+#ending .ending-text { max-width: 600px; color: var(--text); line-height: 1.7; font-size: 14px; }
 #ending .ending-hint { color: var(--text-dim); font-size: 12px; letter-spacing: .1em; }
-#ending .ending-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
-
-/* ============================================================
-   MOBILE FALLBACK
-   ============================================================ */
-#mobile-note {
-  position: fixed; inset: 0; z-index: 95; display: none;
-  background: #05070a; color: var(--text); padding: 30px;
-  flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 16px; font-size: 14px; line-height: 1.6;
-}
-#mobile-note.show { display: flex; }
-#mobile-note h2 { color: var(--accent-bright); letter-spacing: .2em; }
+#ending .ending-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
 
 /* ============================================================
    TOAST
    ============================================================ */
 #toast {
-  position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
-  z-index: 85; background: rgba(10,15,20,.95); border: 1px solid var(--accent);
-  padding: 10px 20px; font-size: 13px; letter-spacing: .1em;
-  transition: transform .35s ease;
+  position: fixed; top: 12px; left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  z-index: 85; background: rgba(10,15,20,.95);
+  border: 1px solid var(--accent); padding: 8px 16px;
+  font-size: 12px; letter-spacing: .08em;
+  transition: transform .35s ease; max-width: 90vw;
+  text-align: center;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ============================================================
+   MOBILE TOUCH CONTROLS (only shown on coarse pointer devices)
+   ============================================================ */
+#mobile-controls { display: none; }
+body.is-touch #mobile-controls { display: block; }
+
+#joystick-zone {
+  position: absolute; left: 0; bottom: 0;
+  width: 45%; height: 45%;
+  pointer-events: auto; touch-action: none;
+  z-index: 42;
+}
+#joystick-base {
+  position: absolute; width: 120px; height: 120px;
+  border-radius: 50%; border: 2px solid rgba(255,255,255,.15);
+  background: rgba(20,26,33,.4);
+  left: 24px; bottom: 24px;
+  pointer-events: none;
+  transition: opacity .2s;
+  opacity: 0;
+}
+#joystick-base.active { opacity: 1; }
+#joystick-knob {
+  position: absolute; width: 50px; height: 50px;
+  border-radius: 50%; background: rgba(201,48,48,.55);
+  border: 2px solid rgba(255,255,255,.35);
+  left: 50%; top: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+#look-zone {
+  position: absolute; right: 0; bottom: 0;
+  width: 55%; height: 100%;
+  pointer-events: auto; touch-action: none;
+  z-index: 42;
+}
+#mobile-buttons {
+  position: absolute; right: 16px; bottom: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 44; pointer-events: none;
+}
+#mobile-buttons button {
+  pointer-events: auto;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(30,20,24,.85); border: 2px solid var(--accent);
+  color: var(--text); font-size: 13px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  transition: transform .1s, background .15s;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 2px;
+}
+#mobile-buttons button:active { transform: scale(.92); background: rgba(90,20,24,.9); }
+#mobile-buttons button .ico { font-size: 20px; line-height: 1; }
+#mobile-buttons button .lbl { font-size: 9px; letter-spacing: .05em; }
+#btn-mob-interact { width: 84px !important; height: 84px !important; }
+#btn-mob-interact.disabled { opacity: .3; }
+
+#pause-btn {
+  position: absolute; top: 12px; right: 12px;
+  z-index: 45; pointer-events: auto;
+  width: 44px; height: 44px; border-radius: 8px;
+  background: rgba(20,26,33,.85); border: 1px solid #2a333d;
+  color: var(--text); font-size: 18px;
+  display: none; align-items: center; justify-content: center;
+}
+body.is-touch #pause-btn { display: flex; }
+
+/* ============================================================
+   MOBILE RESPONSIVE TWEAKS
+   ============================================================ */
+body.is-touch #task-panel {
+  top: auto; bottom: 110px; right: 8px;
+  width: 170px; font-size: 10px;
+}
+body.is-touch #hud .top-left { max-width: 45vw; padding: 6px 10px; }
+body.is-touch #hud .top-left .objective { font-size: 10px; }
+body.is-touch #hud .top-right { padding: 6px 10px; }
+body.is-touch #hud .timer { font-size: 16px; }
+body.is-touch #hud .bottom-center { display: none; }
+body.is-touch #crosshair { width: 4px; height: 4px; margin: -2px 0 0 -2px; }
+body.is-touch #prompt { top: calc(50% + 16px); font-size: 11px; padding: 4px 10px; }
+
+/* Portrait warning */
+#portrait-warn {
+  position: fixed; inset: 0; z-index: 96;
+  background: #05070a; color: var(--text);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 30px; text-align: center; gap: 14px;
+}
+#portrait-warn.show { display: flex; }
+#portrait-warn .ico { font-size: 56px; }
+#portrait-warn h2 { color: var(--accent-bright); letter-spacing: .2em; font-size: 18px; }
+#portrait-warn p { color: var(--text-dim); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -337,7 +429,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   <p id="boot-text">ЗАГРУЗКА...</p>
 </div>
 
-<!-- ============ MAIN MENU ============ -->
+<!-- ============ MENU ============ -->
 <div id="menu" class="hidden">
   <div class="title">Морг: Ночь Демона</div>
   <div class="subtitle">Один труп. Две ночи. Один шанс.</div>
@@ -352,8 +444,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
   <div class="modal-panel">
     <h2>Настройки</h2>
     <div class="row"><label for="set-volume">Громкость</label><input type="range" id="set-volume" min="0" max="100" value="70" /></div>
-    <div class="row"><label for="set-sensitivity">Чувствительность мыши</label><input type="range" id="set-sensitivity" min="20" max="300" value="100" /></div>
-    <div class="row"><label for="set-quality">Качество графики</label>
+    <div class="row"><label for="set-sensitivity">Чувствительность</label><input type="range" id="set-sensitivity" min="20" max="300" value="100" /></div>
+    <div class="row"><label for="set-quality">Качество</label>
       <select id="set-quality"><option value="low">Низкое</option><option value="medium" selected>Среднее</option><option value="high">Высокое</option></select>
     </div>
     <div class="row"><label for="set-fov">Угол обзора</label><input type="range" id="set-fov" min="60" max="100" value="75" /></div>
@@ -367,14 +459,16 @@ button { font-family: inherit; cursor: pointer; border: none; }
 <div class="modal" id="modal-howto">
   <div class="modal-panel">
     <h2>Как играть</h2>
-    <div class="row"><span>WASD</span><span>Движение</span></div>
-    <div class="row"><span>Мышь</span><span>Обзор</span></div>
-    <div class="row"><span>E</span><span>Взаимодействие</span></div>
-    <div class="row"><span>P</span><span>Телефон (SMS)</span></div>
-    <div class="row"><span>Esc</span><span>Пауза</span></div>
-    <p style="margin-top:16px;color:var(--text-dim);font-size:12px;line-height:1.6;">
+    <div class="row"><span>ПК: WASD</span><span>Движение</span></div>
+    <div class="row"><span>ПК: Мышь</span><span>Обзор</span></div>
+    <div class="row"><span>ПК: E</span><span>Взаимодействие</span></div>
+    <div class="row"><span>ПК: P / Esc</span><span>Телефон / Пауза</span></div>
+    <div class="row"><span>Телефон: стик</span><span>Движение</span></div>
+    <div class="row"><span>Телефон: свайп</span><span>Обзор</span></div>
+    <div class="row"><span>Телефон: кнопки</span><span>E / P / Пауза</span></div>
+    <p style="margin-top:14px;color:var(--text-dim);font-size:12px;line-height:1.6;">
       Осматривайте труп, выполняйте задачи ухода, фиксируйте аномалии. Один из трупов — демон.
-      На вторую ночь Марк не придёт, но будет писать. Сожгите демона до рассвета, иначе он вырвется.
+      На вторую ночь Марк не придёт, но будет писать. Сожгите демона до рассвета.
     </p>
     <div class="modal-actions"><button class="menu-btn" id="btn-howto-close" style="width:auto;padding:10px 24px;">Понял</button></div>
   </div>
@@ -384,10 +478,10 @@ button { font-family: inherit; cursor: pointer; border: none; }
 <div class="modal" id="modal-credits">
   <div class="modal-panel">
     <h2>Об игре</h2>
-    <p style="line-height:1.7;font-size:13px;color:var(--text);">
+    <p style="line-height:1.7;font-size:13px;">
       <b>Морг: Ночь Демона</b> — процедурный 3D-хоррор в одном HTML-файле.<br>
-      Движок: Three.js (ESM). Без внешних ассетов — вся графика процедурная.<br>
-      Управление: WASD + мышь. Всё в браузере, оффлайн после загрузки CDN.
+      Движок: Three.js (ESM). Без внешних ассетов — всё процедурное.<br>
+      Управление: ПК (WASD+мышь) или тач (стик+свайп).
     </p>
     <div class="modal-actions"><button class="menu-btn" id="btn-credits-close" style="width:auto;padding:10px 24px;">Закрыть</button></div>
   </div>
@@ -398,7 +492,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   <div class="modal-panel">
     <h2>Сложность</h2>
     <div class="difficulty-card" data-diff="easy">
-      <h3>Стажёр</h3><p>Больше времени, меньше аномалий, подсказки Марка подробные.</p>
+      <h3>Стажёр</h3><p>Больше времени, меньше аномалий, подсказки подробные.</p>
     </div>
     <div class="difficulty-card selected" data-diff="normal">
       <h3>Смена</h3><p>Стандартный режим. Баланс времени и аномалий.</p>
@@ -407,8 +501,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
       <h3>Ночной Кошмар</h3><p>Мало времени, скрытые аномалии, демон активнее.</p>
     </div>
     <div class="modal-actions">
-      <button class="menu-btn" id="btn-difficulty-start" style="width:auto;padding:12px 30px;">Начать смену</button>
-      <button class="menu-btn" id="btn-difficulty-cancel" style="width:auto;padding:12px 30px;">Отмена</button>
+      <button class="menu-btn" id="btn-difficulty-start" style="width:auto;padding:12px 28px;">Начать смену</button>
+      <button class="menu-btn" id="btn-difficulty-cancel" style="width:auto;padding:12px 28px;">Отмена</button>
     </div>
   </div>
 </div>
@@ -417,7 +511,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 <div class="modal" id="modal-pause">
   <div class="modal-panel">
     <h2>Пауза</h2>
-    <div class="modal-actions" style="flex-direction:column;gap:10px;">
+    <div class="modal-actions" style="flex-direction:column;gap:8px;">
       <button class="menu-btn" id="btn-resume" style="width:100%;">Продолжить</button>
       <button class="menu-btn" id="btn-pause-settings" style="width:100%;">Настройки</button>
       <button class="menu-btn" id="btn-quit" style="width:100%;">В главное меню</button>
@@ -434,15 +528,29 @@ button { font-family: inherit; cursor: pointer; border: none; }
     <div class="objective" id="hud-objective">...</div>
   </div>
   <div class="top-right">
-    <div class="timer" id="hud-timer">06:00</div>
-    <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">до рассвета</div>
+    <div class="timer" id="hud-timer">03:00</div>
+    <div style="color:var(--text-dim);font-size:10px;margin-top:2px;">до рассвета</div>
   </div>
-  <div class="bottom-center" id="hud-hint">WASD — двигаться · E — взаимодействие · P — телефон</div>
+  <div class="bottom-center" id="hud-hint">WASD — двигаться · E — взаимодействие · P — телефон · Esc — пауза</div>
 
   <div id="task-panel">
     <button class="close" id="task-close">×</button>
     <h3>Задачи ухода</h3>
     <div id="task-list"></div>
+  </div>
+
+  <!-- ============ MOBILE TOUCH CONTROLS ============ -->
+  <div id="mobile-controls">
+    <div id="look-zone"></div>
+    <div id="joystick-zone">
+      <div id="joystick-base"><div id="joystick-knob"></div></div>
+    </div>
+    <div id="mobile-buttons">
+      <button id="btn-mob-interact" class="disabled"><span class="ico">E</span><span class="lbl">действие</span></button>
+      <button id="btn-mob-phone"><span class="ico">✉</span><span class="lbl">SMS</span></button>
+      <button id="btn-mob-pause"><span class="ico">❚❚</span><span class="lbl">пауза</span></button>
+    </div>
+    <button id="pause-btn">❚❚</button>
   </div>
 </div>
 
@@ -452,14 +560,14 @@ button { font-family: inherit; cursor: pointer; border: none; }
   <div class="ph-msgs" id="ph-msgs"></div>
 </div>
 
-<!-- ============ INTERACT MODAL ============ -->
+<!-- ============ INTERACT ============ -->
 <div id="interact">
   <div class="panel">
     <h3 id="interact-title">Труп #1</h3>
     <div class="sub" id="interact-sub">Выберите действие</div>
     <div class="actions" id="interact-actions"></div>
     <div class="result" id="interact-result">—</div>
-    <button class="close-btn" id="interact-close">Закрыть (E)</button>
+    <button class="close-btn" id="interact-close">Закрыть</button>
   </div>
 </div>
 
@@ -474,15 +582,16 @@ button { font-family: inherit; cursor: pointer; border: none; }
   </div>
 </div>
 
-<!-- ============ MOBILE NOTE ============ -->
-<div id="mobile-note">
-  <h2>Нужен компьютер</h2>
-  <p>Игра использует 3D-рендеринг и управление мышью.<br>Открой её на ПК или ноутбуке в современном браузере.</p>
+<!-- ============ PORTRAIT WARNING ============ -->
+<div id="portrait-warn">
+  <div class="ico">📱</div>
+  <h2>Поверни телефон</h2>
+  <p>Игра рассчитана на горизонтальный режим.</p>
 </div>
 
 <!-- ============ TOAST ============ -->
 <div id="toast"></div>
-<!-- ============ THREE.JS IMPORTMAP ============ -->
+
 <script type="importmap">
 {
   "imports": {
@@ -495,30 +604,37 @@ button { font-family: inherit; cursor: pointer; border: none; }
 import * as THREE from 'three';
 
 /* ============================================================
-   CONFIG & CONSTANTS
+   DEVICE DETECTION
+   ============================================================ */
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+if (IS_TOUCH) document.body.classList.add('is-touch');
+
+/* ============================================================
+   CONFIG
    ============================================================ */
 const CFG = {
-  nightDuration: { easy: 240, normal: 180, hard: 120 }, // секунды на ночь
+  nightDuration: { easy: 240, normal: 180, hard: 120 },
   moveSpeed: 3.2,
   runSpeed: 5.2,
   mouseSensBase: 0.0022,
-  interactDist: 2.4,
-  corpsesCount: 3,
+  touchSensBase: 0.006,
+  interactDist: 2.6,
+  fov: 75,
 };
 
 const DIFFICULTY = {
-  easy:   { anomaliesVisible: 3, hintsDetailed: true,  demonAggro: 0.0 },
-  normal: { anomaliesVisible: 2, hintsDetailed: false, demonAggro: 0.4 },
-  hard:   { anomaliesVisible: 1, hintsDetailed: false, demonAggro: 1.0 },
+  easy:   { anomaliesCount: 2, demonAggro: 0.0 },
+  normal: { anomaliesCount: 3, demonAggro: 0.4 },
+  hard:   { anomaliesCount: 4, demonAggro: 1.0 },
 };
 
 const TASKS_DEF = [
-  { id: 'inspect',   name: 'Внешний осмотр',        tag: 'осмотр',   hint: 'Осмотреть тело на предмет повреждений' },
-  { id: 'thermo',    name: 'Измерить температуру',  tag: 'прибор',   hint: 'Термометр в прямой кишке' },
-  { id: 'skin',      name: 'Проба кожи',            tag: 'тактиль',  hint: 'Проверить эластичность и цвет' },
-  { id: 'tag',       name: 'Сверить бирку',         tag: 'документ', hint: 'Сверить номер бирки с журналом' },
-  { id: 'blood',     name: 'Забор крови',           tag: 'анализ',   hint: 'Взять пробу из вены' },
-  { id: 'anomaly',   name: 'Зафиксировать аномалии',tag: 'ритуал',   hint: 'Отметить все отклонения' },
+  { id: 'inspect', name: 'Внешний осмотр',       tag: 'осмотр',   hint: 'Осмотреть тело на предмет повреждений' },
+  { id: 'thermo',  name: 'Температура',          tag: 'прибор',   hint: 'Термометр в прямой кишке' },
+  { id: 'skin',    name: 'Проба кожи',           tag: 'тактиль',  hint: 'Проверить эластичность и цвет' },
+  { id: 'tag',     name: 'Сверить бирку',        tag: 'документ', hint: 'Сверить номер с журналом' },
+  { id: 'blood',   name: 'Забор крови',          tag: 'анализ',   hint: 'Взять пробу из вены' },
+  { id: 'anomaly', name: 'Фиксация аномалий',    tag: 'ритуал',   hint: 'Отметить все отклонения' },
 ];
 
 const ANOMALY_POOL = [
@@ -537,76 +653,64 @@ const ANOMALY_POOL = [
 /* ============================================================
    UTILS
    ============================================================ */
-const $ = (sel) => document.querySelector(sel);
+const $ = (s) => document.querySelector(s);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
-const randInt = (a, b) => Math.floor(rand(a, b + 1));
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
+let toastTimer = 0;
 function toast(msg, ms = 2200) {
-  const el = $('#toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.classList.remove('show'), ms);
+  const el = $('#toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
-
 function formatTime(sec) {
   const s = Math.max(0, Math.ceil(sec));
-  const m = Math.floor(s / 60);
-  const ss = String(s % 60).padStart(2, '0');
-  return `${String(m).padStart(2, '0')}:${ss}`;
+  return `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
 }
 
 /* ============================================================
-   GAME STATE
+   STATE
    ============================================================ */
 const State = {
   difficulty: 'normal',
-  night: 0,                 // 0 = menu, 1, 2
+  night: 0,
   running: false,
   paused: false,
   timeLeft: 0,
-  corpses: [],              // { id, isDemon, anomalies:[], tasksDone:Set, mesh, ... }
+  corpses: [],
   activeCorpse: null,
   demonBurned: false,
-  innocentsBurned: 0,
   ending: null,
-  // settings
-  volume: 0.7,
-  sensitivity: 1.0,
-  quality: 'medium',
-  fov: 75,
+  volume: 0.7, sensitivity: 1.0, quality: IS_TOUCH ? 'low' : 'medium', fov: 75,
+  _hovered: null,
 };
 
 /* ============================================================
-   BOOT SEQUENCE
+   BOOT
    ============================================================ */
 (function boot() {
-  const fill = $('#boot-bar-fill');
-  const txt = $('#boot-text');
+  const fill = $('#boot-bar-fill'); const txt = $('#boot-text');
   const steps = ['ИНИЦИАЛИЗАЦИЯ...', 'ЗАГРУЗКА СЦЕНЫ...', 'ПОДГОТОВКА МОРГА...', 'ГОТОВО.'];
   let i = 0;
   const tick = () => {
     fill.style.width = `${Math.min(100, ((i + 1) / steps.length) * 100)}%`;
-    txt.textContent = steps[i] ?? '';
+    txt.textContent = steps[i] || '';
     i++;
-    if (i < steps.length) setTimeout(tick, 380 + Math.random() * 200);
+    if (i < steps.length) setTimeout(tick, 320 + Math.random() * 180);
     else setTimeout(() => {
       $('#boot').classList.add('hidden');
       $('#menu').classList.remove('hidden');
-    }, 400);
+    }, 350);
   };
-  setTimeout(tick, 300);
+  setTimeout(tick, 250);
 })();
 
 /* ============================================================
    MENU WIRING
    ============================================================ */
-$('#btn-start').addEventListener('click', () => {
-  $('#modal-difficulty').classList.add('show');
-});
+$('#btn-start').addEventListener('click', () => $('#modal-difficulty').classList.add('show'));
 document.querySelectorAll('.difficulty-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.difficulty-card').forEach(c => c.classList.remove('selected'));
@@ -627,26 +731,27 @@ $('#btn-howto-close').addEventListener('click', () => $('#modal-howto').classLis
 $('#btn-credits').addEventListener('click', () => $('#modal-credits').classList.add('show'));
 $('#btn-credits-close').addEventListener('click', () => $('#modal-credits').classList.remove('show'));
 
-$('#set-volume').addEventListener('input', (e) => { State.volume = e.target.value / 100; if (audioCtx) masterGain.gain.value = State.volume; });
+$('#set-volume').addEventListener('input', (e) => { State.volume = e.target.value / 100; if (masterGain) masterGain.gain.value = State.volume; });
 $('#set-sensitivity').addEventListener('input', (e) => { State.sensitivity = e.target.value / 100; });
 $('#set-quality').addEventListener('change', (e) => { State.quality = e.target.value; applyQuality(); });
 $('#set-fov').addEventListener('input', (e) => { State.fov = +e.target.value; if (camera) { camera.fov = State.fov; camera.updateProjectionMatrix(); } });
 
 /* ============================================================
-   THREE.JS SCENE SETUP
+   THREE.JS SETUP
    ============================================================ */
 let renderer, scene, camera, clock;
-let player = { yaw: 0, pitch: 0, pos: new THREE.Vector3(0, 1.6, 4), vel: new THREE.Vector3() };
+let player = { yaw: 0, pitch: 0, pos: new THREE.Vector3(0, 1.6, 3.8) };
 let keys = {};
 let lights = [];
-let interactiveObjects = []; // meshes with userData.action
-let crematorLever = null;
+let interactiveObjects = [];
+let animStarted = false;
+let isLocked = false;
 
 function initThree() {
   renderer = new THREE.WebGLRenderer({ antialias: State.quality !== 'low', powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, State.quality === 'high' ? 2 : 1.5));
-  renderer.shadowMap.enabled = State.quality !== 'low';
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, State.quality === 'high' ? 2 : 1));
+  renderer.shadowMap.enabled = State.quality === 'high';
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -659,24 +764,21 @@ function initThree() {
 
   camera = new THREE.PerspectiveCamera(State.fov, window.innerWidth / window.innerHeight, 0.05, 100);
   camera.position.copy(player.pos);
+  camera.rotation.order = 'YXZ';
 
   clock = new THREE.Clock();
 
   buildMorgueRoom();
   buildCrematorium();
-  buildCorridorLights();
-
-  // ambient
-  const ambient = new THREE.AmbientLight(0x2a3a4a, 0.25);
-  scene.add(ambient);
+  scene.add(new THREE.AmbientLight(0x2a3a4a, 0.3));
 
   window.addEventListener('resize', onResize);
 }
 
 function applyQuality() {
   if (!renderer) return;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, State.quality === 'high' ? 2 : 1.5));
-  renderer.shadowMap.enabled = State.quality !== 'low';
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, State.quality === 'high' ? 2 : 1));
+  renderer.shadowMap.enabled = State.quality === 'high';
 }
 
 function onResize() {
@@ -685,166 +787,125 @@ function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-/* ---------- PROCEDURAL MATERIALS ---------- */
-function tileMat(color = 0x394650, roughness = 0.6) {
-  const c = document.createElement('canvas');
-  c.width = c.height = 256;
+/* ---------- MATERIALS ---------- */
+function tileMat(color = 0x394650) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#' + new THREE.Color(color).getHexString();
   ctx.fillRect(0, 0, 256, 256);
-  // grout lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.45)';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 3;
   for (let i = 0; i <= 256; i += 64) {
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
   }
-  // stains
   for (let i = 0; i < 40; i++) {
     ctx.fillStyle = `rgba(0,0,0,${rand(0.03, 0.15)})`;
-    ctx.beginPath(); ctx.arc(rand(0, 256), rand(0, 256), rand(2, 12), 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rand(0,256), rand(0,256), rand(2,12), 0, Math.PI * 2); ctx.fill();
   }
   const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(4, 4);
-  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  return new THREE.MeshStandardMaterial({ map: tex, roughness, metalness: 0.05 });
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 4);
+  tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+  return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.05 });
 }
-
 function wallMat() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 512;
+  const c = document.createElement('canvas'); c.width = c.height = 512;
   const ctx = c.getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#2a323a');
-  grad.addColorStop(0.5, '#212830');
-  grad.addColorStop(1, '#151b20');
+  grad.addColorStop(0, '#2a323a'); grad.addColorStop(0.5, '#212830'); grad.addColorStop(1, '#151b20');
   ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 60; i++) {
     ctx.fillStyle = `rgba(0,0,0,${rand(0.05, 0.2)})`;
-    ctx.fillRect(rand(0, 512), rand(0, 512), rand(2, 30), rand(2, 8));
+    ctx.fillRect(rand(0,512), rand(0,512), rand(2,30), rand(2,8));
   }
   const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(2, 1);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(2, 1);
   return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85 });
 }
-
 function metalMat(color = 0x6a7480) {
   return new THREE.MeshStandardMaterial({ color, metalness: 0.85, roughness: 0.35 });
 }
 
-/* ---------- ROOM BUILDERS ---------- */
+/* ---------- ROOM ---------- */
 function buildMorgueRoom() {
-  const room = new THREE.Group();
   const W = 12, D = 10, H = 3.2;
-
-  // floor
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x36434e));
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  room.add(floor);
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
-  // ceiling
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: 0x11161b, roughness: 1 }));
-  ceil.rotation.x = Math.PI / 2;
-  ceil.position.y = H;
-  room.add(ceil);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D),
+    new THREE.MeshStandardMaterial({ color: 0x11161b, roughness: 1 }));
+  ceil.rotation.x = Math.PI / 2; ceil.position.y = H; scene.add(ceil);
 
-  // walls
-  const wallGeo = new THREE.PlaneGeometry(W, H);
-  const wm = wallMat();
-  const back = new THREE.Mesh(wallGeo, wm); back.position.set(0, H / 2, -D / 2); room.add(back);
-  const front = new THREE.Mesh(wallGeo, wm); front.position.set(0, H / 2, D / 2); front.rotation.y = Math.PI; room.add(front);
-  const left = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm); left.position.set(-W / 2, H / 2, 0); left.rotation.y = Math.PI / 2; room.add(left);
-  const right = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm); right.position.set(W / 2, H / 2, 0); right.rotation.y = -Math.PI / 2; room.add(right);
+  const wm = wallMat(); const wallGeo = new THREE.PlaneGeometry(W, H);
+  const back = new THREE.Mesh(wallGeo, wm); back.position.set(0, H/2, -D/2); scene.add(back);
+  const front = new THREE.Mesh(wallGeo, wm); front.position.set(0, H/2, D/2); front.rotation.y = Math.PI; scene.add(front);
+  const left = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm); left.position.set(-W/2, H/2, 0); left.rotation.y = Math.PI/2; scene.add(left);
+  const right = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm); right.position.set(W/2, H/2, 0); right.rotation.y = -Math.PI/2; scene.add(right);
 
-  // lights — hanging fluorescent
-  const lightPositions = [[-3, 2.8, -3], [3, 2.8, -3], [-3, 2.8, 3], [3, 2.8, 3]];
-  for (const [x, y, z] of lightPositions) {
-    const tube = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 1.2, 4, 8), new THREE.MeshBasicMaterial({ color: 0xd8f0ff }));
-    tube.rotation.z = Math.PI / 2;
-    tube.position.set(x, y, z);
-    scene.add(tube);
-
-    const pl = new THREE.PointLight(0xbcd8f0, State.quality === 'low' ? 0.7 : 1.2, 9, 2);
+  // Lights (fewer on touch/low)
+  const count = State.quality === 'low' ? 2 : 4;
+  const positions = [[-3, 2.8, -3], [3, 2.8, -3], [-3, 2.8, 3], [3, 2.8, 3]];
+  for (let i = 0; i < count; i++) {
+    const [x, y, z] = positions[i];
+    const tube = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 1.0, 3, 6),
+      new THREE.MeshBasicMaterial({ color: 0xd8f0ff }));
+    tube.rotation.z = Math.PI / 2; tube.position.set(x, y, z); scene.add(tube);
+    const pl = new THREE.PointLight(0xbcd8f0, State.quality === 'low' ? 1.1 : 1.2, 9, 2);
     pl.position.set(x, y - 0.2, z);
-    if (State.quality !== 'low') { pl.castShadow = true; pl.shadow.mapSize.set(512, 512); }
-    scene.add(pl);
-    lights.push(pl);
+    if (State.quality === 'high') { pl.castShadow = true; pl.shadow.mapSize.set(512, 512); }
+    scene.add(pl); lights.push(pl);
   }
 
-  // mortuary tables (3) — 3 corpses
+  // Tables + corpses
   const tablePositions = [
     new THREE.Vector3(-3, 0, -1.5),
     new THREE.Vector3( 0, 0, -2.5),
     new THREE.Vector3( 3, 0, -1.5),
   ];
-  for (let i = 0; i < tablePositions.length; i++) {
-    buildTable(tablePositions[i], i);
-  }
+  for (let i = 0; i < tablePositions.length; i++) buildTable(tablePositions[i], i);
 
-  // cabinets along back wall
+  // Cabinets
   for (let i = 0; i < 6; i++) {
     const cabinet = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 0.5), metalMat(0x55606b));
-    cabinet.position.set(-W / 2 + 1.2 + i * 1.3, 1.1, -D / 2 + 0.3);
-    cabinet.castShadow = true; cabinet.receiveShadow = true;
+    cabinet.position.set(-W/2 + 1.2 + i * 1.3, 1.1, -D/2 + 0.3);
+    cabinet.castShadow = State.quality === 'high'; cabinet.receiveShadow = true;
     scene.add(cabinet);
-    // drawer handles
     for (let j = 0; j < 3; j++) {
       const handle = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.04, 0.04), metalMat(0x8a95a1));
-      handle.position.set(cabinet.position.x, 0.5 + j * 0.65, -D / 2 + 0.58);
+      handle.position.set(cabinet.position.x, 0.5 + j * 0.65, -D/2 + 0.58);
       scene.add(handle);
     }
   }
 
-  // sink on right wall
+  // Sink
   const sink = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.15, 0.6), metalMat(0x7a8490));
-  sink.position.set(W / 2 - 0.7, 0.95, -1);
-  scene.add(sink);
-  const basin = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.4, 0.45), new THREE.MeshStandardMaterial({ color: 0x2a3038, roughness: 0.4 }));
-  basin.position.set(W / 2 - 0.7, 1.2, -1);
-  scene.add(basin);
+  sink.position.set(W/2 - 0.7, 0.95, -1); scene.add(sink);
+  const basin = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.4, 0.45),
+    new THREE.MeshStandardMaterial({ color: 0x2a3038, roughness: 0.4 }));
+  basin.position.set(W/2 - 0.7, 1.2, -1); scene.add(basin);
   const tap = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.35, 8), metalMat(0xaab4c0));
-  tap.position.set(W / 2 - 0.7, 1.45, -1.15);
-  scene.add(tap);
-
-  scene.add(room);
-  scene.userData.morgueBounds = { W, D, H };
+  tap.position.set(W/2 - 0.7, 1.45, -1.15); scene.add(tap);
 }
 
 function buildTable(pos, index) {
-  const g = new THREE.Group();
-  g.position.copy(pos);
-
-  // legs
+  const g = new THREE.Group(); g.position.copy(pos);
   const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.85, 6);
-  for (const [dx, dz] of [[-0.9, -0.35], [0.9, -0.35], [-0.9, 0.35], [0.9, 0.35]]) {
+  for (const [dx, dz] of [[-0.9,-0.35],[0.9,-0.35],[-0.9,0.35],[0.9,0.35]]) {
     const leg = new THREE.Mesh(legGeo, metalMat(0x5a6570));
-    leg.position.set(dx, 0.42, dz);
-    leg.castShadow = true;
-    g.add(leg);
+    leg.position.set(dx, 0.42, dz); leg.castShadow = State.quality === 'high'; g.add(leg);
   }
-  // tabletop
   const top = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.08, 0.9), metalMat(0x77818c));
-  top.position.y = 0.88;
-  top.castShadow = true; top.receiveShadow = true;
-  g.add(top);
+  top.position.y = 0.88; top.castShadow = State.quality === 'high'; top.receiveShadow = true; g.add(top);
 
-  // corpse lying on top — simple procedural body
   const corpse = buildCorpseMesh(index);
-  corpse.position.set(0, 0.96, 0);
-  g.add(corpse);
+  corpse.position.set(0, 0.96, 0); g.add(corpse);
 
-  // interaction hotspot (invisible box above table)
   const hotspot = new THREE.Mesh(
     new THREE.BoxGeometry(2.2, 0.6, 1.0),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
   );
   hotspot.position.set(0, 1.2, 0);
   hotspot.userData.action = { type: 'corpse', index };
-  g.add(hotspot);
-  interactiveObjects.push(hotspot);
+  g.add(hotspot); interactiveObjects.push(hotspot);
 
   scene.add(g);
 }
@@ -853,127 +914,72 @@ function buildCorpseMesh(index) {
   const g = new THREE.Group();
   const skinMat = new THREE.MeshStandardMaterial({ color: 0xb8b8ac, roughness: 0.9 });
 
-  // torso
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 1.1, 4, 12), skinMat);
-  torso.rotation.z = Math.PI / 2;
-  torso.castShadow = true;
-  g.add(torso);
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 1.1, 4, 10), skinMat);
+  torso.rotation.z = Math.PI / 2; torso.castShadow = State.quality === 'high'; g.add(torso);
 
-  // head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), skinMat);
-  head.position.set(-0.75, 0.02, 0);
-  head.castShadow = true;
-  g.add(head);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), skinMat);
+  head.position.set(-0.75, 0.02, 0); g.add(head);
 
-  // legs (two capsules)
   for (const dz of [-0.12, 0.12]) {
-    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.9, 4, 8), skinMat);
-    leg.rotation.z = Math.PI / 2;
-    leg.position.set(0.95, -0.05, dz);
-    leg.castShadow = true;
-    g.add(leg);
+    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.9, 3, 6), skinMat);
+    leg.rotation.z = Math.PI / 2; leg.position.set(0.95, -0.05, dz); g.add(leg);
   }
-  // arms
   for (const dz of [-0.3, 0.3]) {
-    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.8, 4, 8), skinMat);
-    arm.rotation.z = Math.PI / 2;
-    arm.position.set(-0.15, 0.02, dz);
-    arm.castShadow = true;
-    g.add(arm);
+    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.8, 3, 6), skinMat);
+    arm.rotation.z = Math.PI / 2; arm.position.set(-0.15, 0.02, dz); g.add(arm);
   }
-
-  // subtle per-corpse variation
   skinMat.color.offsetHSL(rand(-0.03, 0.03), rand(-0.05, 0.05), rand(-0.05, 0.05));
   g.rotation.y = rand(-0.05, 0.05);
-
-  // store ref for demon visual later
   g.userData.skinMat = skinMat;
   return g;
 }
 
 function buildCrematorium() {
-  // small alcove off the right side of the morgue — door + lever
-  const group = new THREE.Group();
-  group.position.set(0, 0, 4.4);
-
-  // door frame
+  const group = new THREE.Group(); group.position.set(0, 0, 4.4);
   const frame = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.6, 0.15), metalMat(0x3a424b));
-  frame.position.set(0, 1.3, 0);
-  group.add(frame);
-
-  // door
+  frame.position.set(0, 1.3, 0); group.add(frame);
   const door = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.3, 0.1), metalMat(0x1f262d));
-  door.position.set(0, 1.15, 0.01);
-  group.add(door);
-
-  // small indicator light above door
-  const ind = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), new THREE.MeshBasicMaterial({ color: 0x3a1a1a }));
-  ind.position.set(0, 2.55, 0.05);
-  group.add(ind);
+  door.position.set(0, 1.15, 0.01); group.add(door);
+  const ind = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x3a1a1a }));
+  ind.position.set(0, 2.55, 0.05); group.add(ind);
   group.userData.indicator = ind;
 
-  // lever to the right of door
   const leverBase = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.15), metalMat(0x55606b));
-  leverBase.position.set(1.35, 1.2, 0.02);
-  group.add(leverBase);
+  leverBase.position.set(1.35, 1.2, 0.02); group.add(leverBase);
 
   const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8), metalMat(0x8a95a1));
-  lever.position.set(1.35, 1.35, 0.15);
-  lever.rotation.x = -0.4;
+  lever.position.set(1.35, 1.35, 0.15); lever.rotation.x = -0.4;
   lever.userData.action = { type: 'cremator' };
-  group.add(lever);
-  interactiveObjects.push(lever);
-  crematorLever = lever;
+  group.add(lever); interactiveObjects.push(lever);
 
-  const leverTip = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0x8a1a1a, roughness: 0.5 }));
-  leverTip.position.set(0, 0.28, 0);
-  lever.add(leverTip);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8),
+    new THREE.MeshStandardMaterial({ color: 0x8a1a1a, roughness: 0.5 }));
+  tip.position.set(0, 0.28, 0); lever.add(tip);
 
   scene.add(group);
-
-  // hidden point light for crematorium glow
   const cl = new THREE.PointLight(0xff5533, 0, 5, 2);
-  cl.position.set(0, 1.5, 4.2);
-  scene.add(cl);
+  cl.position.set(0, 1.5, 4.2); scene.add(cl);
   scene.userData.crematorLight = cl;
-}
-
-function buildCorridorLights() {
-  // a few dim fill lights near the door
-  const fill = new THREE.PointLight(0x331111, 0.4, 6, 2);
-  fill.position.set(0, 2.2, 3.5);
-  scene.add(fill);
+  scene.userData.crematorGroup = group;
 }
 
 /* ============================================================
-   INPUT — POINTER LOCK + KEYBOARD
+   INPUT — PC (pointer lock + keyboard)
    ============================================================ */
-let pointerLocked = false;
-
-function requestLock() {
-  renderer.domElement.requestPointerLock?.();
-}
-
 document.addEventListener('pointerlockchange', () => {
-  pointerLocked = document.pointerLockElement === renderer.domElement;
-  if (!pointerLocked && State.running && !State.paused && !State.ending) {
-    // user pressed Esc — pause
-    openPause();
-  }
+  isLocked = document.pointerLockElement === renderer?.domElement;
+  if (!isLocked && State.running && !State.paused && !IS_TOUCH) openPause();
 });
-
 document.addEventListener('mousemove', (e) => {
-  if (!pointerLocked || !State.running || State.paused) return;
+  if (IS_TOUCH || !isLocked || !State.running || State.paused) return;
   const s = CFG.mouseSensBase * State.sensitivity;
   player.yaw -= e.movementX * s;
-  player.pitch -= e.movementY * s;
-  player.pitch = clamp(player.pitch, -Math.PI / 2 + 0.05, Math.PI / 2 - 0.05);
+  player.pitch = clamp(player.pitch - e.movementY * s, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
 });
-
 document.addEventListener('keydown', (e) => {
   keys[e.code] = true;
   if (!State.running || State.paused) return;
-
   if (e.code === 'KeyE') {
     if ($('#interact').classList.contains('show')) closeInteract();
     else tryInteract();
@@ -983,44 +989,124 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
+function requestLock() {
+  if (IS_TOUCH) return;
+  renderer.domElement.requestPointerLock?.();
+}
+
 /* ============================================================
-   PLAYER MOVEMENT
+   INPUT — MOBILE (joystick + swipe look + buttons)
+   ============================================================ */
+const joy = { active: false, x: 0, y: 0, pointerId: null };
+const look = { active: false, lastX: 0, lastY: 0, pointerId: null };
+
+function setupTouchControls() {
+  if (!IS_TOUCH) return;
+  const joyZone = $('#joystick-zone');
+  const joyBase = $('#joystick-base');
+  const joyKnob = $('#joystick-knob');
+  const lookZone = $('#look-zone');
+  const JOY_RADIUS = 45;
+
+  joyZone.addEventListener('pointerdown', (e) => {
+    if (joy.active) return;
+    joy.active = true; joy.pointerId = e.pointerId;
+    const r = joyBase.getBoundingClientRect();
+    // reposition base under finger
+    const size = 120;
+    const cx = clamp(e.clientX, 60 + 8, window.innerWidth - 300);
+    const cy = clamp(e.clientY, 60 + 8, window.innerHeight - 60);
+    joyBase.style.left = (cx - 60) + 'px';
+    joyBase.style.top = (cy - 60) + 'px';
+    joyBase.style.bottom = 'auto';
+    joyBase.classList.add('active');
+    joy.baseX = cx; joy.baseY = cy;
+    joy.x = 0; joy.y = 0;
+    joyZone.setPointerCapture(e.pointerId);
+  });
+  joyZone.addEventListener('pointermove', (e) => {
+    if (!joy.active || e.pointerId !== joy.pointerId) return;
+    let dx = e.clientX - joy.baseX;
+    let dy = e.clientY - joy.baseY;
+    const len = Math.hypot(dx, dy);
+    if (len > JOY_RADIUS) { dx = dx / len * JOY_RADIUS; dy = dy / len * JOY_RADIUS; }
+    joy.x = dx / JOY_RADIUS; joy.y = dy / JOY_RADIUS;
+    joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  });
+  const endJoy = (e) => {
+    if (e.pointerId !== joy.pointerId) return;
+    joy.active = false; joy.x = 0; joy.y = 0; joy.pointerId = null;
+    joyBase.classList.remove('active');
+    joyKnob.style.transform = 'translate(-50%, -50%)';
+  };
+  joyZone.addEventListener('pointerup', endJoy);
+  joyZone.addEventListener('pointercancel', endJoy);
+  joyZone.addEventListener('pointerleave', endJoy);
+
+  lookZone.addEventListener('pointerdown', (e) => {
+    if (look.active) return;
+    look.active = true; look.pointerId = e.pointerId;
+    look.lastX = e.clientX; look.lastY = e.clientY;
+    lookZone.setPointerCapture(e.pointerId);
+  });
+  lookZone.addEventListener('pointermove', (e) => {
+    if (!look.active || e.pointerId !== look.pointerId) return;
+    if (!State.running || State.paused) return;
+    const dx = e.clientX - look.lastX;
+    const dy = e.clientY - look.lastY;
+    look.lastX = e.clientX; look.lastY = e.clientY;
+    const s = CFG.touchSensBase * State.sensitivity;
+    player.yaw -= dx * s;
+    player.pitch = clamp(player.pitch - dy * s, -Math.PI/2 + 0.05, Math.PI/2 - 0.05);
+  });
+  const endLook = (e) => {
+    if (e.pointerId !== look.pointerId) return;
+    look.active = false; look.pointerId = null;
+  };
+  lookZone.addEventListener('pointerup', endLook);
+  lookZone.addEventListener('pointercancel', endLook);
+
+  $('#btn-mob-interact').addEventListener('click', () => {
+    if ($('#interact').classList.contains('show')) closeInteract();
+    else tryInteract();
+  });
+  $('#btn-mob-phone').addEventListener('click', togglePhone);
+  $('#btn-mob-pause').addEventListener('click', openPause);
+  $('#pause-btn').addEventListener('click', openPause);
+}
+
+/* ============================================================
+   PLAYER UPDATE
    ============================================================ */
 function updatePlayer(dt) {
-  if (!pointerLocked && State.running && !State.paused) return;
-  const speed = keys['ShiftLeft'] ? CFG.runSpeed : CFG.moveSpeed;
-  const dir = new THREE.Vector3();
-  if (keys['KeyW']) dir.z -= 1;
-  if (keys['KeyS']) dir.z += 1;
-  if (keys['KeyA']) dir.x -= 1;
-  if (keys['KeyD']) dir.x += 1;
-  if (dir.lengthSq() > 0) dir.normalize();
-
-  // rotate by yaw only
+  let mx = 0, mz = 0;
+  if (IS_TOUCH) {
+    mx = joy.x; mz = joy.y;
+  } else {
+    if (keys['KeyW']) mz -= 1;
+    if (keys['KeyS']) mz += 1;
+    if (keys['KeyA']) mx -= 1;
+    if (keys['KeyD']) mx += 1;
+  }
+  const len = Math.hypot(mx, mz);
+  if (len > 1) { mx /= len; mz /= len; }
+  const speed = (keys['ShiftLeft'] ? CFG.runSpeed : CFG.moveSpeed);
   const sin = Math.sin(player.yaw), cos = Math.cos(player.yaw);
-  const wx = dir.x * cos - dir.z * sin;
-  const wz = dir.x * sin + dir.z * cos;
+  const wx = mx * cos - mz * sin;
+  const wz = mx * sin + mz * cos;
+  player.pos.x = clamp(player.pos.x + wx * speed * dt, -5.6, 5.6);
+  player.pos.z = clamp(player.pos.z + wz * speed * dt, -4.6, 4.6);
 
-  player.pos.x += wx * speed * dt;
-  player.pos.z += wz * speed * dt;
-
-  // bounds
-  player.pos.x = clamp(player.pos.x, -5.6, 5.6);
-  player.pos.z = clamp(player.pos.z, -4.6, 4.6);
-
-  // head bob
-  const moving = dir.lengthSq() > 0;
+  const moving = Math.abs(mx) + Math.abs(mz) > 0.05;
   const t = clock.elapsedTime;
-  const bob = moving ? Math.sin(t * (speed > 4 ? 12 : 8)) * 0.03 : 0;
-
+  const bob = moving ? Math.sin(t * 8) * 0.03 : 0;
   camera.position.set(player.pos.x, 1.6 + bob, player.pos.z);
-  camera.rotation.order = 'YXZ';
   camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
 }
 
 /* ============================================================
-   INTERACTION — RAYCAST
+   RAYCAST / TARGETING
    ============================================================ */
 const raycaster = new THREE.Raycaster();
 raycaster.far = CFG.interactDist;
@@ -1029,23 +1115,25 @@ function updateTargeting() {
   if (!State.running || State.paused || $('#interact').classList.contains('show')) return;
   raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
   const hits = raycaster.intersectObjects(interactiveObjects, false);
-  const cross = $('#crosshair');
-  const prompt = $('#prompt');
+  const cross = $('#crosshair'); const prompt = $('#prompt');
   if (hits.length > 0) {
-    const obj = hits[0].object;
-    const action = obj.userData.action;
+    const action = hits[0].object.userData.action;
     cross.classList.add('hot');
+    State._hovered = action;
     if (action.type === 'corpse') {
-      prompt.textContent = `[E] Осмотреть труп #${action.index + 1}`;
+      prompt.textContent = `[${IS_TOUCH ? 'E' : 'E'}] Осмотреть труп #${action.index + 1}`;
+      State.activeCorpse = action.index;
+      $('#task-panel').classList.add('show');
+      refreshTaskPanel();
     } else if (action.type === 'cremator') {
-      prompt.textContent = State.demonBurned || State.innocentsBurned > 0 ? '[E] Крематор (использован)' : '[E] Активировать крематор';
+      prompt.textContent = State.demonBurned ? 'Крематор использован' : '[E] Активировать крематор';
     }
     prompt.classList.add('show');
-    State._hovered = action;
+    if (IS_TOUCH) $('#btn-mob-interact').classList.remove('disabled');
   } else {
-    cross.classList.remove('hot');
-    prompt.classList.remove('show');
+    cross.classList.remove('hot'); prompt.classList.remove('show');
     State._hovered = null;
+    if (IS_TOUCH) $('#btn-mob-interact').classList.add('disabled');
   }
 }
 
@@ -1057,25 +1145,17 @@ function tryInteract() {
 }
 
 /* ============================================================
-   CORPSE PANEL — CARE TASKS
-   ============================================================ */
-let currentCorpseIndex = -1;
-
+   CORPSE PANEL   ============================================================ */
 function openCorpsePanel(index) {
-  currentCorpseIndex = index;
   const corpse = State.corpses[index];
   if (!corpse) return;
-
+  State.activeCorpse = index;
   $('#interact-title').textContent = `Труп #${index + 1}`;
   $('#interact-sub').textContent = corpse.tasksDone.size === TASKS_DEF.length
-    ? 'Все процедуры выполнены.'
-    : 'Выберите процедуру. Аномалии фиксируются отдельно.';
-
-  const actionsEl = $('#interact-actions');
-  actionsEl.innerHTML = '';
+    ? 'Все процедуры выполнены.' : 'Выберите процедуру.';
+  const actionsEl = $('#interact-actions'); actionsEl.innerHTML = '';
   const resultEl = $('#interact-result');
-  resultEl.textContent = '—';
-  resultEl.className = 'result';
+  resultEl.textContent = '—'; resultEl.className = 'result';
 
   for (const task of TASKS_DEF) {
     const btn = document.createElement('button');
@@ -1085,138 +1165,79 @@ function openCorpsePanel(index) {
     btn.addEventListener('click', () => doTask(corpse, task, resultEl));
     actionsEl.appendChild(btn);
   }
-
   $('#interact').classList.add('show');
-  document.exitPointerLock?.();
   State.paused = true;
+  if (!IS_TOUCH) document.exitPointerLock?.();
 }
 
 function closeInteract() {
   $('#interact').classList.remove('show');
   State.paused = false;
-  requestLock();
+  if (!IS_TOUCH) requestLock();
   refreshTaskPanel();
 }
-
 $('#interact-close').addEventListener('click', closeInteract);
 
 function doTask(corpse, task, resultEl) {
   if (corpse.tasksDone.has(task.id)) return;
   corpse.tasksDone.add(task.id);
-
-  // determine outcome & reveal anomalies gradually
-  let message = '';
-  let cls = '';
-
+  let message = ''; let cls = '';
   switch (task.id) {
-    case 'inspect': {
-      if (corpse.isDemon && Math.random() < 0.7) {
-        message = 'На теле замечены едва заметные следы. Что-то не так.';
-        cls = 'danger';
-        revealAnomaly(corpse);
-      } else {
-        message = 'Видимых повреждений нет. Тело чистое, бирка на месте.';
-        cls = 'ok';
-      }
+    case 'inspect':
+      if (corpse.isDemon && Math.random() < 0.7) { message = 'На теле замечены едва заметные следы. Что-то не так.'; cls = 'danger'; revealAnomaly(corpse); }
+      else { message = 'Видимых повреждений нет. Тело чистое, бирка на месте.'; cls = 'ok'; }
       break;
-    }
-    case 'thermo': {
-      if (corpse.isDemon) {
-        message = `Термометр показывает ${rand(4, 9).toFixed(1)}°C — ниже нормы.`;
-        cls = 'danger';
-        if (Math.random() < 0.6) revealAnomaly(corpse);
-      } else {
-        message = `Температура ${rand(11, 16).toFixed(1)}°C — в пределах нормы для морга.`;
-        cls = 'ok';
-      }
+    case 'thermo':
+      if (corpse.isDemon) { message = `Термометр: ${rand(4,9).toFixed(1)}°C — ниже нормы.`; cls = 'danger'; if (Math.random() < 0.6) revealAnomaly(corpse); }
+      else { message = `Температура ${rand(11,16).toFixed(1)}°C — норма.`; cls = 'ok'; }
       break;
-    }
-    case 'skin': {
-      if (corpse.isDemon) {
-        message = 'Кожа слишком эластичная у основания шеи. Будто живая.';
-        cls = 'danger';
-        if (Math.random() < 0.6) revealAnomaly(corpse);
-      } else {
-        message = 'Кожа бледная, эластичность снижена — норма.';
-        cls = 'ok';
-      }
+    case 'skin':
+      if (corpse.isDemon) { message = 'Кожа слишком эластичная у основания шеи. Будто живая.'; cls = 'danger'; if (Math.random() < 0.6) revealAnomaly(corpse); }
+      else { message = 'Кожа бледная, эластичность снижена — норма.'; cls = 'ok'; }
       break;
-    }
-    case 'tag': {
-      if (corpse.tagMismatch) {
-        message = `Бирка: №${corpse.tagNumber}. В журнале: №${corpse.tagNumber + 1}. Несовпадение!`;
-        cls = 'danger';
-        revealAnomaly(corpse);
-      } else {
-        message = `Бирка совпадает с журналом: №${corpse.tagNumber}.`;
-        cls = 'ok';
-      }
+    case 'tag':
+      if (corpse.tagMismatch) { message = `Бирка: №${corpse.tagNumber}. В журнале: №${corpse.tagNumber + 1}. Несовпадение!`; cls = 'danger'; revealAnomaly(corpse); }
+      else { message = `Бирка совпадает: №${corpse.tagNumber}.`; cls = 'ok'; }
       break;
-    }
-    case 'blood': {
-      if (corpse.isDemon) {
-        message = 'Кровь тёплая и не сворачивается. Это невозможно у мёртвого.';
-        cls = 'danger';
-        if (Math.random() < 0.7) revealAnomaly(corpse);
-      } else {
-        message = 'Кровь тёмная, свернувшаяся — соответствует норме.';
-        cls = 'ok';
-      }
+    case 'blood':
+      if (corpse.isDemon) { message = 'Кровь тёплая и не сворачивается. Это невозможно.'; cls = 'danger'; if (Math.random() < 0.7) revealAnomaly(corpse); }
+      else { message = 'Кровь тёмная, свернувшаяся — норма.'; cls = 'ok'; }
       break;
-    }
-    case 'anomaly': {
-      const remaining = TASKS_DEF.length - 1 - [...corpse.tasksDone].filter(t => t !== 'anomaly').length;
-      if (corpse.anomalies.length === 0) {
-        message = 'Аномалий не зафиксировано. Тело выглядит обычным.';
-        cls = 'ok';
-      } else {
-        message = `Зафиксировано аномалий: ${corpse.anomalies.length}. Отмечено в журнале.`;
-        cls = corpse.anomalies.length >= 2 ? 'danger' : '';
-      }
+    case 'anomaly':
+      if (corpse.anomalies.length === 0) { message = 'Аномалий не зафиксировано.'; cls = 'ok'; }
+      else { message = `Аномалий: ${corpse.anomalies.length}. Отмечено.`; cls = corpse.anomalies.length >= 2 ? 'danger' : ''; }
       break;
-    }
   }
-
   resultEl.textContent = message;
   resultEl.className = 'result ' + cls;
-
-  // update buttons
-  const buttons = $('#interact-actions').querySelectorAll('.action-btn');
   const idx = TASKS_DEF.findIndex(t => t.id === task.id);
-  if (buttons[idx]) buttons[idx].disabled = true;
-
+  const btns = $('#interact-actions').querySelectorAll('.action-btn');
+  if (btns[idx]) btns[idx].disabled = true;
   refreshTaskPanel();
-
-  // if all done, allow burn by stepping back
   if (corpse.tasksDone.size === TASKS_DEF.length) {
     setTimeout(() => {
-      if (corpse.anomalies.length === 0) {
-        resultEl.textContent = 'Все процедуры выполнены. Аномалий не найдено. Можно готовить к кремации.';
-      } else {
-        resultEl.textContent = `Все процедуры выполнены. Аномалий: ${corpse.anomalies.length}. Это может быть демон.`;
-      }
+      resultEl.textContent = corpse.anomalies.length === 0
+        ? 'Все процедуры выполнены. Аномалий нет. Можно к крематору.'
+        : `Процедуры завершены. Аномалий: ${corpse.anomalies.length}. Возможно, это демон.`;
     }, 2200);
   }
 }
 
 function revealAnomaly(corpse) {
-  const available = ANOMALY_POOL.filter(a => !corpse.anomalies.includes(a.id));
-  if (available.length === 0) return;
-  const a = pick(available);
+  const avail = ANOMALY_POOL.filter(a => !corpse.anomalies.includes(a.id));
+  if (avail.length === 0) return;
+  const a = pick(avail);
   corpse.anomalies.push(a.id);
-  corpse.anomalyTexts.push(a.text);
-  if (State.difficulty !== 'easy') toast(`Аномалия: ${a.text}`, 3500);
-  else toast(`Аномалия: ${a.text}`, 4000);
+  toast(`Аномалия: ${a.text}`, 3500);
 }
 
 /* ============================================================
-   TASK PANEL (visible during play)
+   TASK PANEL
    ============================================================ */
 function refreshTaskPanel() {
-  const list = $('#task-list');
-  list.innerHTML = '';
+  const list = $('#task-list'); list.innerHTML = '';
   if (State.activeCorpse == null) {
-    list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;">Подойдите к трупу и нажмите [E]</div>';
+    list.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Подойдите к трупу и нажмите [E]</div>';
     return;
   }
   const c = State.corpses[State.activeCorpse];
@@ -1228,38 +1249,24 @@ function refreshTaskPanel() {
     div.innerHTML = `<span>${t.name}</span><span class="tag">${done ? '✓' : t.tag}</span>`;
     list.appendChild(div);
   }
-  // anomaly count
   const an = document.createElement('div');
-  an.style.marginTop = '10px';
-  an.style.fontSize = '11px';
+  an.style.marginTop = '8px'; an.style.fontSize = '10px';
   an.style.color = c.anomalies.length > 0 ? 'var(--danger)' : 'var(--text-dim)';
   an.textContent = `Аномалий: ${c.anomalies.length}`;
   list.appendChild(an);
 }
-
 $('#task-close').addEventListener('click', () => $('#task-panel').classList.remove('show'));
 
 /* ============================================================
    CREMATOR
    ============================================================ */
-let crematorBusy = false;
-
 function triggerCremator() {
-  if (State.demonBurned || State.innocentsBurned >= 1) {
-    toast('Крематор уже использован.', 2000);
-    return;
-  }
-  // find corpse that has all tasks done AND user walked up to it last? Simplified: player must have an "active target"
-  // We use nearest corpse with all tasks done as the intended target
+  if (State.demonBurned) { toast('Крематор уже использован.', 2000); return; }
   const ready = State.corpses.findIndex(c => c.tasksDone.size === TASKS_DEF.length);
-  if (ready === -1) {
-    toast('Нет тела, готового к кремации. Выполните все процедуры.', 2600);
-    return;
-  }
-  crematorBusy = true;
-  // visual: indicator turns red, cremator light pulses
-  const group = scene.children.find(o => o.userData?.indicator);
-  if (group) group.userData.indicator.material.color.set(0xff2222);
+  if (ready === -1) { toast('Нет готового тела. Выполните все процедуры.', 2600); return; }
+  crematorWhoosh();
+  const grp = scene.userData.crematorGroup;
+  if (grp) grp.userData.indicator.material.color.set(0xff2222);
   const cl = scene.userData.crematorLight;
   if (cl) { cl.intensity = 3; cl.color.set(0xff3300); }
 
@@ -1269,27 +1276,15 @@ function triggerCremator() {
       State.demonBurned = true;
       endNight('demon_burned');
     } else {
-      State.innocentsBurned++;
-      // reveal — you burned the wrong one
-      if (State.night === 2) {
-        // must still find the demon? Too late
-        endNight('wrong_burn');
-      } else {
-        toast('Вы сожгли невинного. В ночь 2 ошибки не будет — демон отомстит.', 4000);
-        endNight('wrong_burn');
-      }
+      endNight('wrong_burn');
     }
   }, 2200);
 }
 
 /* ============================================================
-   PHONE / SMS
+   PHONE
    ============================================================ */
-function togglePhone() {
-  const p = $('#phone');
-  p.classList.toggle('open');
-}
-
+function togglePhone() { $('#phone').classList.toggle('open'); }
 $('#phone-close').addEventListener('click', () => $('#phone').classList.remove('open'));
 
 function pushMessage(who, text) {
@@ -1297,59 +1292,42 @@ function pushMessage(who, text) {
   const div = document.createElement('div');
   div.className = `msg ${who}`;
   div.innerHTML = `<div class="who">${who === 'mark' ? 'МАРК' : 'ВЫ'}</div>${text}`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  // toast if not open
-  if (!$('#phone').classList.contains('open')) toast(`SMS от Марка`, 1800);
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  if (!$('#phone').classList.contains('open')) toast('SMS от Марка', 1800);
 }
 
 /* ============================================================
    NIGHT FLOW
    ============================================================ */
 function startNight(n) {
-  State.night = n;
-  State.running = true;
-  State.paused = false;
+  State.night = n; State.running = true; State.paused = false;
   State.timeLeft = CFG.nightDuration[State.difficulty];
-  State.demonBurned = false;
-  State.innocentsBurned = 0;
-  State.ending = null;
-  State.corpses = [];
-  State.activeCorpse = null;
-  crematorBusy = false;
+  State.demonBurned = false; State.ending = null;
+  State.corpses = []; State.activeCorpse = null;
+  player.pos.set(0, 1.6, 3.8); player.yaw = 0; player.pitch = 0;
 
-  // reset player position
-  player.pos.set(0, 1.6, 3.8);
-  player.yaw = 0;
-  player.pitch = 0;
-  player.vel.set(0, 0, 0);
-
-  // reset cremator visuals
-  if (scene) {
-    const group = scene.children.find(o => o.userData?.indicator);
-    if (group) group.userData.indicator.material.color.set(0x3a1a1a);
-    const cl = scene.userData.crematorLight;
-    if (cl) { cl.intensity = 0; cl.color.set(0xff5533); }
-  }
+  const grp = scene.userData.crematorGroup;
+  if (grp) grp.userData.indicator.material.color.set(0x3a1a1a);
+  const cl = scene.userData.crematorLight;
+  if (cl) { cl.intensity = 0; cl.color.set(0xff5533); }
 
   generateCorpses();
-  buildNightMessages();
   updateHUD();
-
   $('#hud').classList.add('active');
   $('#task-panel').classList.add('show');
   $('#ph-msgs').innerHTML = '';
   $('#phone').classList.remove('open');
+  if (!IS_TOUCH) requestLock();
 
   setTimeout(() => {
     pushMessage('mark', n === 1
-      ? 'Смена началась. Слушай, я на минуту отойду, осмотри тела сам, я вернусь.'
-      : 'Меня не будет сегодня. Слушай внимательно: один из трупов — не человек. Сожги его до рассвета.');
-    if (n === 2) setTimeout(() => pushMessage('mark', 'Не ошибитесь. Если сожжёте невинного — демон вырвется.'), 6000);
-  }, 3000);
+      ? 'Смена началась. Осмотри тела сам, я скоро вернусь.'
+      : 'Меня не будет. Один из трупов — не человек. Сожги его до рассвета.');
+    if (n === 2) setTimeout(() =>
+      pushMessage('mark', 'Не ошибись. Сожжёшь невинного — демон вырвется.'), 6000);
+  }, 2500);
 
-  requestLock();
-  animate();
+  ensureLoop();
 }
 
 function generateCorpses() {
@@ -1358,38 +1336,24 @@ function generateCorpses() {
   State.corpses = [];
   for (let i = 0; i < 3; i++) {
     const isDemon = i === demonIndex;
-    const numAnomalies = isDemon
-      ? (State.difficulty === 'easy' ? 2 : State.difficulty === 'hard' ? 4 : 3)
-      : 0;
+    const numAnomalies = isDemon ? DIFFICULTY[State.difficulty].anomaliesCount : 0;
     const pool = shuffle(ANOMALY_POOL);
-    const anomalies = isDemon ? pool.slice(0, numAnomalies).map(a => a.id) : [];
-    const anomalyTexts = isDemon ? pool.slice(0, numAnomalies).map(a => a.text) : [];
     State.corpses.push({
-      id: i,
-      isDemon,
-      anomalies,
-      anomalyTexts,
+      id: i, isDemon,
+      anomalies: isDemon ? pool.slice(0, numAnomalies).map(a => a.id) : [],
       tagNumber: 1000 + i * 37,
       tagMismatch: isDemon && Math.random() < 0.6,
       tasksDone: new Set(),
     });
   }
-
-  // visual tweak: give demon a faint red tint on skin
-  for (const c of State.corpses) {
-    // we can find the corpse mesh by traversing scene for tables; simpler — skip
-  }
-
-  State.activeCorpse = null;
   refreshTaskPanel();
 }
 
 function updateHUD() {
   $('#hud-night').textContent = `НОЧЬ ${State.night}`;
-  const objs = State.night === 1
-    ? 'Осмотрите все тела. Выполните процедуры ухода. Приготовьтесь к ночи 2.'
-    : 'Найдите демона среди тел. Сожгите его в крематоре до рассвета.';
-  $('#hud-objective').textContent = objs;
+  $('#hud-objective').textContent = State.night === 1
+    ? 'Осмотрите тела. Выполните процедуры.'
+    : 'Найдите демона. Сожгите до рассвета.';
 }
 
 /* ============================================================
@@ -1397,54 +1361,36 @@ function updateHUD() {
    ============================================================ */
 function endNight(reason) {
   if (State.ending) return;
-  State.ending = reason;
-  State.running = false;
-  State.paused = false;
-  document.exitPointerLock?.();
-
-  const title = $('#ending-title');
-  const text = $('#ending-text');
-  const hint = $('#ending-hint');
-  const overlay = $('#ending');
+  State.ending = reason; State.running = false; State.paused = false;
+  if (!IS_TOUCH) document.exitPointerLock?.();
+  const title = $('#ending-title'), text = $('#ending-text'), hint = $('#ending-hint');
 
   if (State.night === 1) {
-    // First night cannot truly end — it's a setup. Show a "продолжение"
-    if (reason === 'demon_burned') {
-      // shouldn't happen on night 1 unless user burned someone — same as wrong
-      title.textContent = 'НЕ ТУДА';
-      title.className = 'ending-title bad';
-      text.textContent = 'Вы сожгли тело, но не демона. Демон понял, что его ищут. Ночь 2 будет жестокой.';
-      hint.textContent = 'Продолжайте — Марк предупредит.';
-    } else {
-      title.textContent = 'НОЧЬ 1 ПРОЙДЕНА';
-      title.className = 'ending-title neutral';
-      text.textContent = 'Вы выполнили процедуры и не разбудили демона. Марк ушёл. Завтра — ночь 2.';
-      hint.textContent = 'Нажмите «Ещё раз» чтобы начать ночь 2.';
-    }
-    overlay.classList.add('show');
-    setTimeout(() => { if (State.night === 1) startNight(2); }, 6000);
+    title.textContent = 'НОЧЬ 1 ПРОЙДЕНА'; title.className = 'ending-title neutral';
+    text.textContent = 'Вы выполнили процедуры. Марк ушёл. Завтра — ночь 2.';
+    hint.textContent = 'Автопереход через 5 секунд...';
+    $('#ending').classList.add('show');
+    setTimeout(() => {
+      $('#ending').classList.remove('show');
+      startNight(2);
+    }, 5000);
     return;
   }
 
-  // night 2 endings
   if (reason === 'demon_burned') {
-    title.textContent = 'РАССВЕТ';
-    title.className = 'ending-title good';
-    text.textContent = 'Демон сожжён. Угли остывают. Марк присылает одно сообщение: «Жив. Хорошо.» Ночь закончилась.';
-    hint.textContent = 'Вы выжили.';
+    title.textContent = 'РАССВЕТ'; title.className = 'ending-title good';
+    text.textContent = 'Демон сожжён. Угли остывают. Марк пишет: «Жив. Хорошо.» Вы выжили.';
+    hint.textContent = 'Хорошая концовка.';
   } else if (reason === 'wrong_burn') {
-    title.textContent = 'ДЕМОН ВЫРВАЛСЯ';
-    title.className = 'ending-title bad';
-    text.textContent = 'Вы сожгли невинного. Демон вырвался из тела и забрал вас. Утро не наступит.';
-    hint.textContent = 'Попробуйте снова. Внимательнее с аномалиями.';
+    title.textContent = 'ДЕМОН ВЫРВАЛСЯ'; title.className = 'ending-title bad';
+    text.textContent = 'Вы сожгли невинного. Демон вырвался и забрал вас.';
+    hint.textContent = 'Внимательнее с аномалиями.';
   } else if (reason === 'timeout') {
-    title.textContent = 'ВРЕМЯ ВЫШЛО';
-    title.className = 'ending-title bad';
-    text.textContent = 'Рассвет так и не наступил. Демон поглотил вас в темноте.';
-    hint.textContent = 'Следующая попытка — быстрее.';
+    title.textContent = 'ВРЕМЯ ВЫШЛО'; title.className = 'ending-title bad';
+    text.textContent = 'Рассвет не наступил. Демон поглотил вас в темноте.';
+    hint.textContent = 'Быстрее в следующий раз.';
   }
-
-  overlay.classList.add('show');
+  $('#ending').classList.add('show');
 }
 
 $('#btn-ending-retry').addEventListener('click', () => {
@@ -1465,13 +1411,13 @@ $('#btn-ending-menu').addEventListener('click', () => {
 function openPause() {
   if (!State.running) return;
   State.paused = true;
-  document.exitPointerLock?.();
+  if (!IS_TOUCH) document.exitPointerLock?.();
   $('#modal-pause').classList.add('show');
 }
 $('#btn-resume').addEventListener('click', () => {
   $('#modal-pause').classList.remove('show');
   State.paused = false;
-  requestLock();
+  if (!IS_TOUCH) requestLock();
 });
 $('#btn-pause-settings').addEventListener('click', () => {
   $('#modal-pause').classList.remove('show');
@@ -1482,100 +1428,64 @@ $('#btn-quit').addEventListener('click', () => {
   $('#hud').classList.remove('active');
   $('#task-panel').classList.remove('show');
   $('#menu').classList.remove('hidden');
-  State.running = false;
-  State.paused = false;
+  State.running = false; State.paused = false;
 });
 
 /* ============================================================
-   SIMPLE AUDIO (procedural drone + cremator whoosh)
+   AUDIO
    ============================================================ */
 let audioCtx = null, masterGain = null;
 function initAudio() {
   if (audioCtx) return;
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = State.volume;
+    masterGain = audioCtx.createGain(); masterGain.gain.value = State.volume;
     masterGain.connect(audioCtx.destination);
-    // low drone
-    const osc = audioCtx.createOscillator();
-    const oscGain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = 55;
-    oscGain.gain.value = 0.03;
-    osc.connect(oscGain).connect(masterGain);
-    osc.start();
-    const osc2 = audioCtx.createOscillator();
-    osc2.type = 'sawtooth';
-    osc2.frequency.value = 82;
-    const osc2Gain = audioCtx.createGain();
-    osc2Gain.gain.value = 0.008;
-    osc2.connect(osc2Gain).connect(masterGain);
-    osc2.start();
-  } catch (e) {
-    console.warn('Audio unavailable', e);
-  }
+    const o1 = audioCtx.createOscillator(), g1 = audioCtx.createGain();
+    o1.type = 'sine'; o1.frequency.value = 55; g1.gain.value = 0.03;
+    o1.connect(g1).connect(masterGain); o1.start();
+    const o2 = audioCtx.createOscillator(), g2 = audioCtx.createGain();
+    o2.type = 'sawtooth'; o2.frequency.value = 82; g2.gain.value = 0.008;
+    o2.connect(g2).connect(masterGain); o2.start();
+  } catch (e) { console.warn('Audio', e); }
 }
-document.addEventListener('click', () => initAudio(), { once: true });
+document.addEventListener('pointerdown', () => initAudio(), { once: true });
 
 function crematorWhoosh() {
   if (!audioCtx) return;
-  const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
-  const data = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
-  const src = audioCtx.createBufferSource();
-  src.buffer = noiseBuffer;
-  const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + 0.3);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.2);
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 800;
-  src.connect(filter).connect(gain).connect(masterGain);
-  src.start();
-  src.stop(audioCtx.currentTime + 2.3);
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random()*2-1)*0.5;
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + 0.3);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.2);
+  const f = audioCtx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 800;
+  src.connect(f).connect(g).connect(masterGain);
+  src.start(); src.stop(audioCtx.currentTime + 2.3);
 }
 
 /* ============================================================
-   ANIMATION LOOP
+   MAIN LOOP — single, always running
    ============================================================ */
-let animStarted = false;
-function animate() {
-  if (animStarted) return; // single loop
+function ensureLoop() {
+  if (animStarted) return;
   animStarted = true;
   const loop = () => {
     requestAnimationFrame(loop);
     const dt = Math.min(clock.getDelta(), 0.05);
     if (State.running && !State.paused && !State.ending) {
-      // timer
       State.timeLeft -= dt;
-      if (State.timeLeft < 30) $('#hud-timer').classList.add('danger');
-      else $('#hud-timer').classList.remove('danger');
-      $('#hud-timer').textContent = formatTime(State.timeLeft);
+      const tEl = $('#hud-timer');
+      tEl.textContent = formatTime(State.timeLeft);
+      tEl.classList.toggle('danger', State.timeLeft < 30);
       if (State.timeLeft <= 0) {
         if (State.night === 2) endNight('timeout');
-        else { State.timeLeft = 0; }
+        else State.timeLeft = 0;
       }
-
       updatePlayer(dt);
       updateTargeting();
-
-      // update active corpse when near
-      if (State._hovered?.type === 'corpse') {
-        State.activeCorpse = State._hovered.index;
-        $('#task-panel').classList.add('show');
-        refreshTaskPanel();
-      }
-
-      // demon ambience — flicker lights if demon exists and night 2
-      if (State.night === 2 && State.corpses.length > 0) {
-        const demonAlive = State.corpses.some(c => c.isDemon) && !State.demonBurned;
-        if (demonAlive) {
-          const flick = 0.85 + Math.sin(clock.elapsedTime * 13) * 0.15;
-          for (const l of lights) l.intensity = (State.quality === 'low' ? 0.7 : 1.2) * flick;
-        }
-      }
     }
     renderer.render(scene, camera);
   };
@@ -1583,21 +1493,26 @@ function animate() {
 }
 
 /* ============================================================
-   MOBILE CHECK + INIT
+   PORTRAIT CHECK (mobile only)
    ============================================================ */
-function checkMobile() {
-  const isTouch = 'ontouchstart' in window && window.innerWidth < 900;
-  if (isTouch) $('#mobile-note').classList.add('show');
+function checkOrientation() {
+  if (!IS_TOUCH) return;
+  const portrait = window.innerHeight > window.innerWidth;
+  $('#portrait-warn').classList.toggle('show', portrait);
 }
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
 
+/* ============================================================
+   INIT
+   ============================================================ */
 (function init() {
-  checkMobile();
+  checkOrientation();
   initThree();
-  animate(); // render idle menu scene
-  // show a dim camera view behind menu
-  camera.position.set(0, 1.6, 4);
-  camera.rotation.order = 'YXZ';
+  setupTouchControls();
+  ensureLoop(); // start render loop immediately, even in menu
+  camera.position.set(0, 1.6, 3.8);
 })();
 </script>
 </body>
-    </html>
+</html>
