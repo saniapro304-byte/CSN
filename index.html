@@ -11,8 +11,6 @@
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg-dark);color:var(--text);font-family:var(--font-ui);user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 canvas{display:block}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-
-/* FX */
 #fx-vignette{position:fixed;inset:0;z-index:30;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.55) 75%,rgba(0,0,0,.9) 100%);mix-blend-mode:multiply}
 #fx-grain{position:fixed;inset:-50%;z-index:31;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/></svg>");animation:grainShift .25s steps(4) infinite}
 @keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-4%)}75%{transform:translate(-2%,-2%)}100%{transform:translate(3%,3%)}}
@@ -20,8 +18,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 #fx-blood.danger{opacity:1;filter:hue-rotate(-10deg) brightness(1.3)}
 #fx-flash{position:fixed;inset:0;z-index:33;pointer-events:none;background:#fff;opacity:0;transition:opacity .08s ease}
 #fx-flash.on{opacity:.85}
-
-/* NIGHT INTRO */
 #night-intro{position:fixed;inset:0;z-index:88;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px}
 #night-intro.show{display:flex}
 #night-intro .night-label{font-size:clamp(10px,1.6vw,13px);letter-spacing:.8em;color:var(--text-dim);text-transform:uppercase;opacity:0;animation:fadeInUp 1.2s ease forwards}
@@ -29,8 +25,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 #night-intro .night-quote{font-size:clamp(12px,2vw,16px);letter-spacing:.2em;color:var(--text-dim);font-style:italic;max-width:500px;opacity:0;animation:fadeInUp 1.4s ease forwards 1.6s}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes nightPulse{0%{opacity:0;transform:scale(1.3);filter:blur(8px)}40%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:.6;transform:scale(1.02)}}
-
-/* BOOT / MENU / MODALS */
 #boot{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 40%,#10151c 0%,#05070a 80%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity .8s ease}
 #boot.hidden{opacity:0;pointer-events:none}
 #boot h1{font-size:clamp(22px,5vw,34px);letter-spacing:.35em;color:var(--accent-bright);text-shadow:0 0 22px rgba(201,48,48,.55);animation:flicker 3.5s infinite}
@@ -50,7 +44,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .menu-btn:active:not(:disabled){transform:scale(.98)}
 .menu-btn:disabled{opacity:.35;cursor:not-allowed}
 .menu-btn .hint{display:block;font-size:10px;color:var(--text-dim);letter-spacing:.15em;margin-top:4px}
-
 .modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(3,5,8,.88);backdrop-filter:blur(4px);padding:16px;overflow-y:auto}
 .modal.show{display:flex;animation:modalIn .3s ease}
 @keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
@@ -66,8 +59,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .difficulty-card.selected{border-color:var(--accent-bright);background:rgba(90,20,24,.6)}
 .difficulty-card h3{font-size:15px;letter-spacing:.15em;margin-bottom:4px}
 .difficulty-card p{font-size:12px;color:var(--text-dim)}
-
-/* HUD */
 #hud{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;transition:opacity .5s ease;font-size:13px;letter-spacing:.06em;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 #hud.active{opacity:1}
 #hud .top-left{position:absolute;top:12px;left:12px;background:rgba(5,7,10,.75);padding:8px 12px;border-left:3px solid var(--accent);max-width:55vw}
@@ -82,15 +73,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 #crosshair.hot{background:var(--accent-bright);transform:scale(1.6)}
 #prompt{position:absolute;top:calc(50% + 22px);left:50%;transform:translateX(-50%);color:var(--text);font-size:12px;background:rgba(5,7,10,.9);padding:5px 12px;border:1px solid #2a333d;white-space:nowrap;opacity:0;transition:opacity .2s}
 #prompt.show{opacity:1}
-
-/* FLASHLIGHT */
 #flashlight-ind{position:absolute;bottom:70px;right:18px;width:46px;height:46px;border-radius:50%;border:2px solid #2a333d;background:rgba(10,15,20,.85);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text-dim);transition:all .2s}
 #flashlight-ind.on{border-color:var(--warn);color:var(--warn);box-shadow:0 0 14px rgba(201,161,46,.5)}
 #flashlight-ind .battery{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:30px;height:3px;background:#1a2129}
 #flashlight-ind .battery>i{display:block;height:100%;width:100%;background:var(--warn);transition:width .3s,background .3s}
 #flashlight-ind.low .battery>i{background:var(--danger)}
-
-/* TASK PANEL */
 #task-panel{position:absolute;right:12px;top:82px;width:220px;background:rgba(5,7,10,.88);border:1px solid #232c36;padding:12px;opacity:0;transform:translateX(20px);transition:opacity .3s,transform .3s;pointer-events:none}
 #task-panel.show{opacity:1;transform:translateX(0);pointer-events:auto}
 #task-panel h3{font-size:11px;letter-spacing:.2em;color:var(--accent-bright);margin-bottom:8px;text-transform:uppercase}
@@ -100,8 +87,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 #task-panel .task .tag{font-size:9px;color:var(--text-dim)}
 #task-panel .close{position:absolute;top:6px;right:8px;color:var(--text-dim);font-size:16px}
 #task-panel .corpse-state{margin-top:10px;padding:6px 8px;background:#0a0f14;border-left:2px solid var(--warn);font-size:10px;color:var(--text-dim);line-height:1.4}
-
-/* PHONE / INTERACT / ENDING */
 #phone{position:fixed;z-index:55;right:12px;bottom:12px;width:min(300px,calc(100vw - 24px));max-height:60vh;display:flex;flex-direction:column;background:#0a0f14;border:1px solid #2a333d;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.8);transform:translateY(120%);transition:transform .4s ease;font-size:12px}
 #phone.open{transform:translateY(0)}
 #phone .ph-header{padding:10px 14px;border-bottom:1px solid #1a2129;display:flex;justify-content:space-between;align-items:center;color:var(--text-dim);font-size:11px;letter-spacing:.15em}
@@ -136,8 +121,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 #ending .ending-text{max-width:600px;color:var(--text);line-height:1.7;font-size:14px}
 #ending .ending-hint{color:var(--text-dim);font-size:12px;letter-spacing:.1em}
 #ending .ending-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
-
-/* SCARE */
 #scare-overlay{position:fixed;inset:0;z-index:86;background:#000;display:none;align-items:center;justify-content:center;pointer-events:none}
 #scare-overlay.show{display:flex;animation:scareIn .4s ease}
 #scare-overlay .face{width:min(420px,70vw);height:min(420px,70vw);display:flex;align-items:center;justify-content:center;font-size:clamp(120px,30vw,280px);color:#8a0a0a;text-shadow:0 0 40px rgba(200,0,0,.9),0 0 80px rgba(200,0,0,.5);animation:faceShake .1s infinite}
@@ -145,20 +128,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 @keyframes faceShake{0%,100%{transform:translate(0,0)}25%{transform:translate(-4px,3px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
 #toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:85;background:rgba(10,15,20,.95);border:1px solid var(--accent);padding:8px 16px;font-size:12px;letter-spacing:.08em;transition:transform .35s ease;max-width:90vw;text-align:center}
 #toast.show{transform:translateX(-50%) translateY(0)}
-
-/* ============================================================
-   MOBILE CONTROLS — ФИНАЛЬНЫЙ ФИКС
-   ============================================================ */
 #mobile-controls{display:none}
 body.is-touch #mobile-controls{display:block}
-
 #joystick-zone{position:absolute;left:0;bottom:0;width:45%;height:60%;pointer-events:auto;touch-action:none;z-index:50}
 #joystick-base{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(20,26,33,.55);left:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));pointer-events:none;opacity:0;transition:opacity .2s}
 #joystick-base.active{opacity:1}
 #joystick-knob{position:absolute;width:56px;height:56px;border-radius:50%;background:rgba(201,48,48,.65);border:2px solid rgba(255,255,255,.5);left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 16px rgba(201,48,48,.6)}
-
 #look-zone{position:absolute;right:0;top:0;width:55%;height:55%;pointer-events:auto;touch-action:none;z-index:40}
-
 #mobile-buttons{position:absolute;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:45;pointer-events:none}
 #mobile-buttons button{pointer-events:auto;width:56px;height:56px;border-radius:50%;background:rgba(30,20,24,.9);border:2px solid var(--accent);color:var(--text);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;transition:transform .1s,background .15s}
 #mobile-buttons button:active{transform:scale(.92);background:rgba(90,20,24,.95)}
@@ -167,10 +143,8 @@ body.is-touch #mobile-controls{display:block}
 #btn-mob-interact{width:68px !important;height:68px !important}
 #btn-mob-interact.disabled{opacity:.3}
 #btn-mob-flashlight.on{border-color:var(--warn);background:rgba(70,50,10,.85)}
-
 #pause-btn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:60;pointer-events:auto;width:44px;height:44px;border-radius:8px;background:rgba(20,26,33,.9);border:1px solid #2a333d;color:var(--text);font-size:18px;display:none;align-items:center;justify-content:center}
 body.is-touch #pause-btn{display:flex}
-
 body.is-touch #task-panel{top:auto;bottom:calc(200px + env(safe-area-inset-bottom,0px));right:8px;width:165px;font-size:10px}
 body.is-touch #hud .top-left{max-width:50vw;padding:6px 10px}
 body.is-touch #hud .top-left .objective{font-size:10px}
@@ -180,7 +154,6 @@ body.is-touch #hud .bottom-center{display:none}
 body.is-touch #crosshair{width:4px;height:4px;margin:-2px 0 0 -2px}
 body.is-touch #prompt{top:calc(50% + 16px);font-size:11px;padding:4px 10px}
 body.is-touch #flashlight-ind{bottom:auto;top:calc(60px + env(safe-area-inset-top,0px));right:12px;width:40px;height:40px;font-size:16px}
-
 #portrait-warn{position:fixed;inset:0;z-index:96;background:#05070a;color:var(--text);display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;gap:14px}
 #portrait-warn.show{display:flex}
 #portrait-warn .ico{font-size:56px}
@@ -536,6 +509,13 @@ let gurney = null;
 let crematorGroup = null;
 let crematorLight = null;
 
+/* Зоны с ленивой прогрузкой */
+const WorldZones = {
+  morgue:     { group: null, built: false, center: new THREE.Vector3(0, 1.6, -1), radius: 9 },
+  corridor:   { group: null, built: false, center: new THREE.Vector3(8, 1.6, 1), radius: 5 },
+  crematorium:{ group: null, built: false, center: new THREE.Vector3(14, 1.6, 0), radius: 8 },
+};
+
 function initThree() {
   renderer = new THREE.WebGLRenderer({ antialias: State.quality !== 'low', powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -622,14 +602,43 @@ function metalMat(color = 0x6a7480) {
   return new THREE.MeshStandardMaterial({ color, metalness: 0.85, roughness: 0.35 });
 }
 
-/* ---------- WORLD ---------- */
+/* ============================================================
+   WORLD + ZONES (Lazy Loading)
+   ============================================================ */
 function buildWorld() {
-  buildMorgue();
-  buildCorridor();
-  buildCrematoriumRoom();
+  for (const key of Object.keys(WorldZones)) {
+    WorldZones[key].group = new THREE.Group();
+    WorldZones[key].group.visible = false;
+    scene.add(WorldZones[key].group);
+  }
+  buildMorgueInto(WorldZones.morgue.group);
+  WorldZones.morgue.built = true;
+  WorldZones.morgue.group.visible = true;
+
   scene.add(new THREE.AmbientLight(0x3a4a5a, 0.6));
   scene.add(new THREE.HemisphereLight(0x4a5a6a, 0x1a1010, 0.4));
+
+  if (WorldZones.crematorium.built && crematorGroup) crematorGroup.fire = WorldZones.crematorium.group.children.find(c => c.isGroup && c.children[0]?.isMesh && c.userData.isFire) || crematorGroup.fire;
+  if (scene.userData.fireGroup) crematorGroup.fire = scene.userData.fireGroup;
 }
+
+function updateWorldZones() {
+  const camPos = player.pos;
+  for (const key of Object.keys(WorldZones)) {
+    const z = WorldZones[key];
+    const dist = camPos.distanceTo(z.center);
+    const near = dist < z.radius + 4;
+
+    if (near && !z.built) {
+      if (key === 'corridor')    buildCorridorInto(z.group);
+      if (key === 'crematorium') buildCrematoriumInto(z.group);
+      z.built = true;
+      z.group.visible = true;
+    }
+    if (z.group) z.group.visible = near;
+  }
+}
+
 function makeLamp(x, y, z, color = 0xbcd8f0, intensity = 1.8, distance = 10) {
   const tube = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 1.1, 3, 6), new THREE.MeshBasicMaterial({ color: 0xd8f0ff }));
   tube.rotation.z = Math.PI / 2; tube.position.set(x, y, z); scene.add(tube);
@@ -639,48 +648,47 @@ function makeLamp(x, y, z, color = 0xbcd8f0, intensity = 1.8, distance = 10) {
   scene.add(pl); lights.push(pl);
 }
 
-function buildMorgue() {
+/* ---------- MORGUE ---------- */
+function buildMorgueInto(parent) {
   const W = 12, D = 8, H = 3.2, CZ = -1;
 
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x3e4a54));
   floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, CZ);
-  floor.receiveShadow = State.quality === 'high'; scene.add(floor);
+  floor.receiveShadow = State.quality === 'high'; parent.add(floor);
 
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: 0x141920 }));
-  ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, CZ); scene.add(ceil);
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, CZ); parent.add(ceil);
 
   const wm = wallMat();
   const back = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
-  back.position.set(0, H/2, CZ - D/2); scene.add(back);
+  back.position.set(0, H/2, CZ - D/2); parent.add(back);
   const front = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
-  front.position.set(0, H/2, CZ + D/2); front.rotation.y = Math.PI; scene.add(front);
+  front.position.set(0, H/2, CZ + D/2); front.rotation.y = Math.PI; parent.add(front);
   const left = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm);
-  left.position.set(-W/2, H/2, CZ); left.rotation.y = Math.PI/2; scene.add(left);
+  left.position.set(-W/2, H/2, CZ); left.rotation.y = Math.PI/2; parent.add(left);
 
   const rightA = new THREE.Mesh(new THREE.PlaneGeometry(3, H), wm);
-  rightA.position.set(W/2, H/2, CZ - D/2 + 1.5); rightA.rotation.y = -Math.PI/2; scene.add(rightA);
+  rightA.position.set(W/2, H/2, CZ - D/2 + 1.5); rightA.rotation.y = -Math.PI/2; parent.add(rightA);
   const rightB = new THREE.Mesh(new THREE.PlaneGeometry(3.5, H), wm);
-  rightB.position.set(W/2, H/2, CZ + D/2 - 1.75); rightB.rotation.y = -Math.PI/2; scene.add(rightB);
+  rightB.position.set(W/2, H/2, CZ + D/2 - 1.75); rightB.rotation.y = -Math.PI/2; parent.add(rightB);
 
   makeLamp(-3, 2.8, CZ - 2, 0xbcd8f0, 2.0, 10);
   makeLamp( 3, 2.8, CZ - 2, 0xbcd8f0, 2.0, 10);
   makeLamp(-3, 2.8, CZ + 2, 0xc8dcf0, 1.6, 9);
   makeLamp( 3, 2.8, CZ + 2, 0xc8dcf0, 1.6, 9);
 
-  // ячейки
   for (let i = 0; i < 6; i++) {
-    buildFridgeCell(i, -W/2 + 1.2 + i * 2.0, 1.1, CZ - D/2 + 0.35);
+    buildFridgeCell(i, -W/2 + 1.2 + i * 2.0, 1.1, CZ - D/2 + 0.35, parent);
   }
 
   const table = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.7), metalMat(0x77818c));
-  table.position.set(4.2, 0.88, CZ + 2.5); scene.add(table);
+  table.position.set(4.2, 0.88, CZ + 2.5); parent.add(table);
 
   buildGurney(4.5, 0.5);
 }
 
-function buildFridgeCell(index, x, y, z) {
+function buildFridgeCell(index, x, y, z, parent) {
   const g = new THREE.Group(); g.position.set(x, y, z);
-
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 2.0, 0.7), metalMat(0x4a555f));
   g.add(body);
 
@@ -708,7 +716,7 @@ function buildFridgeCell(index, x, y, z) {
   hotspot.userData.action = { type: 'fridge', index };
   g.add(hotspot); interactiveObjects.push(hotspot);
 
-  scene.add(g);
+  parent.add(g);
   drawerMeshes[index] = { group: g, doorPivot, busyLight, hotspot, corpse: null, open: false };
 }
 
@@ -729,47 +737,49 @@ function buildGurney(x, z) {
   g.visible = false; scene.add(g); gurney = g;
 }
 
-function buildCorridor() {
+/* ---------- CORRIDOR ---------- */
+function buildCorridorInto(parent) {
   const W = 4, D = 2.5, H = 3.2, cx = 8, cz = 1;
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x333d46));
-  floor.rotation.x = -Math.PI / 2; floor.position.set(cx, 0.01, cz); scene.add(floor);
+  floor.rotation.x = -Math.PI / 2; floor.position.set(cx, 0.01, cz); parent.add(floor);
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: 0x0f1419 }));
-  ceil.rotation.x = Math.PI / 2; ceil.position.set(cx, H, cz); scene.add(ceil);
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(cx, H, cz); parent.add(ceil);
   const wm = wallMat();
   const north = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
-  north.position.set(cx, H/2, cz - D/2); scene.add(north);
+  north.position.set(cx, H/2, cz - D/2); parent.add(north);
   const south = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
-  south.position.set(cx, H/2, cz + D/2); south.rotation.y = Math.PI; scene.add(south);
+  south.position.set(cx, H/2, cz + D/2); south.rotation.y = Math.PI; parent.add(south);
   const cl = new THREE.PointLight(0xff7744, 1.2, 6, 2);
   cl.position.set(cx, H - 0.4, cz); scene.add(cl); lights.push(cl);
 }
 
-function buildCrematoriumRoom() {
+/* ---------- CREMATORIUM ---------- */
+function buildCrematoriumInto(parent) {
   const W = 8, D = 8, H = 3.4, cx = 14, cz = 0;
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), tileMat(0x353028));
-  floor.rotation.x = -Math.PI / 2; floor.position.set(cx, 0.01, cz); scene.add(floor);
+  floor.rotation.x = -Math.PI / 2; floor.position.set(cx, 0.01, cz); parent.add(floor);
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: 0x0a0605 }));
-  ceil.rotation.x = Math.PI / 2; ceil.position.set(cx, H, cz); scene.add(ceil);
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(cx, H, cz); parent.add(ceil);
 
   const wm = wallMat();
   const north = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
-  north.position.set(cx, H/2, cz - D/2); scene.add(north);
+  north.position.set(cx, H/2, cz - D/2); parent.add(north);
   const south = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm);
-  south.position.set(cx, H/2, cz + D/2); south.rotation.y = Math.PI; scene.add(south);
+  south.position.set(cx, H/2, cz + D/2); south.rotation.y = Math.PI; parent.add(south);
   const east = new THREE.Mesh(new THREE.PlaneGeometry(D, H), wm);
-  east.position.set(cx + W/2, H/2, cz); east.rotation.y = -Math.PI/2; scene.add(east);
+  east.position.set(cx + W/2, H/2, cz); east.rotation.y = -Math.PI/2; parent.add(east);
   const westA = new THREE.Mesh(new THREE.PlaneGeometry(3, H), wm);
-  westA.position.set(cx - W/2, H/2, cz - D/2 + 1.5); westA.rotation.y = Math.PI/2; scene.add(westA);
+  westA.position.set(cx - W/2, H/2, cz - D/2 + 1.5); westA.rotation.y = Math.PI/2; parent.add(westA);
   const westB = new THREE.Mesh(new THREE.PlaneGeometry(3, H), wm);
-  westB.position.set(cx - W/2, H/2, cz + D/2 - 1.5); westB.rotation.y = Math.PI/2; scene.add(westB);
+  westB.position.set(cx - W/2, H/2, cz + D/2 - 1.5); westB.rotation.y = Math.PI/2; parent.add(westB);
 
   makeLamp(cx - 2, 2.9, cz - 2, 0xffaa66, 1.4, 8);
   makeLamp(cx + 2, 2.9, cz + 2, 0xff7744, 1.4, 8);
 
-  buildCremator(cx + 2.5, cz);
+  buildCremator(cx + 2.5, cz, parent);
 }
 
-function buildCremator(x, z) {
+function buildCremator(x, z, parent) {
   const g = new THREE.Group(); g.position.set(x, 0, z);
 
   const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.2, 1.5), metalMat(0x3a3a3a));
@@ -791,7 +801,7 @@ function buildCremator(x, z) {
   hotspot.userData.action = { type: 'cremator' };
   g.add(hotspot); interactiveObjects.push(hotspot);
 
-  scene.add(g);
+  parent.add(g);
   crematorGroup = { group: g, doorPivot, window_, fire: null };
 
   crematorLight = new THREE.PointLight(0xff4400, 0, 6, 2);
@@ -820,7 +830,7 @@ function buildCrematorFire() {
   fireGroup.position.set(16.5, 0, 0);
   fireGroup.visible = false;
   scene.add(fireGroup);
-  if (crematorGroup) crematorGroup.fire = fireGroup;
+  scene.userData.fireGroup = fireGroup;
 }
 
 function buildFlashlight() {
@@ -990,11 +1000,10 @@ function updatePlayer(dt) {
   player.pos.x += wx * dt;
   player.pos.z += wz * dt;
 
-  // Допустимые зоны (по 3 комнатам)
   const allowed = [
-    { x: [-5.6, 5.6], z: [-4.6, 2.6] },   // морг
-    { x: [5.9, 9.6],  z: [-0.1, 2.1] },   // коридор
-    { x: [9.9, 17.6], z: [-3.6, 3.6] },   // крематорий
+    { x: [-5.6, 5.6], z: [-4.6, 2.6] },
+    { x: [5.9, 9.6],  z: [-0.1, 2.1] },
+    { x: [9.9, 17.6], z: [-3.6, 3.6] },
   ];
   const ok = allowed.some(r => player.pos.x >= r.x[0] && player.pos.x <= r.x[1] && player.pos.z >= r.z[0] && player.pos.z <= r.z[1]);
   if (!ok) {
@@ -1052,7 +1061,13 @@ raycaster.far = CFG.interactDist;
 function updateTargeting() {
   if (!State.running || State.paused || $('#interact').classList.contains('show')) return;
   raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-  const hits = raycaster.intersectObjects(interactiveObjects, false);
+  // Ищем только среди ВИДИМЫХ групп, чтобы не зацепить объекты скрытой комнаты
+  const visibleObjects = interactiveObjects.filter(obj => {
+    let p = obj;
+    while (p) { if (p.visible === false) return false; p = p.parent; }
+    return true;
+  });
+  const hits = raycaster.intersectObjects(visibleObjects, false);
   const cross = $('#crosshair'); const prompt = $('#prompt');
 
   if (hits.length > 0) {
@@ -1097,6 +1112,7 @@ function handleFridge(cellIdx) {
   if (!corpse.drawnOut) {
     corpse.drawnOut = true;
     const cell = drawerMeshes[cellIdx];
+    if (!cell) return;
     cell.busyLight.material.color.set(0xff3300);
     cell.doorPivot.rotation.y = -Math.PI / 2;
     if (gurney) {
@@ -1154,11 +1170,13 @@ function returnToFridge(corpseId, resultEl) {
   const corpse = State.corpses[corpseId];
   corpse.returned = true;
   const cell = drawerMeshes[corpse.cellIndex];
-  cell.busyLight.material.color.set(0x22aa44);
-  cell.doorPivot.rotation.y = 0;
+  if (cell) {
+    cell.busyLight.material.color.set(0x22aa44);
+    cell.doorPivot.rotation.y = 0;
+  }
   if (gurney) gurney.visible = false;
   const mesh = corpseMeshes[corpseId];
-  if (mesh) {
+  if (mesh && cell) {
     if (mesh.parent) mesh.parent.remove(mesh);
     cell.group.add(mesh);
     mesh.position.set(0, 0, -0.15);
@@ -1286,6 +1304,7 @@ function handleCremator() {
   if (crematorGroup) crematorGroup.doorPivot.rotation.y = -Math.PI / 2;
   if (crematorLight) { crematorLight.intensity = 4; crematorLight.color.set(0xff3300); }
   if (crematorGroup && crematorGroup.fire) crematorGroup.fire.visible = true;
+  if (scene.userData.fireGroup) scene.userData.fireGroup.visible = true;
   if (crematorGroup) crematorGroup.window_.material.color.set(0xff3300);
   $('#fx-flash').classList.add('on');
   setTimeout(() => $('#fx-flash').classList.remove('on'), 90);
@@ -1420,7 +1439,7 @@ function resetWorldObjects() {
   for (const cell of drawerMeshes) {
     if (!cell) continue;
     cell.doorPivot.rotation.y = 0;
-    cell.busyLight.material.color.set(0x222222);
+    if (cell.busyLight) cell.busyLight.material.color.set(0x222222);
     cell.open = false;
     if (cell.corpse) {
       if (cell.corpse.parent) cell.corpse.parent.remove(cell.corpse);
@@ -1437,8 +1456,23 @@ function resetWorldObjects() {
     crematorGroup.window_.material.color.set(0x110000);
     if (crematorGroup.fire) crematorGroup.fire.visible = false;
   }
+  if (scene.userData.fireGroup) scene.userData.fireGroup.visible = false;
   if (crematorLight) { crematorLight.intensity = 0; crematorLight.color.set(0xff4400); }
   $('#fx-blood').classList.remove('danger');
+
+  // Сброс зон: морг пересобираем, остальные прячем до подхода
+  interactiveObjects = [];
+  for (const key of Object.keys(WorldZones)) {
+    const z = WorldZones[key];
+    if (!z.group) continue;
+    while (z.group.children.length > 0) z.group.remove(z.group.children[0]);
+    z.built = false;
+    z.group.visible = false;
+  }
+  drawerMeshes = [];
+  buildMorgueInto(WorldZones.morgue.group);
+  WorldZones.morgue.built = true;
+  WorldZones.morgue.group.visible = true;
 }
 
 function generateCorpses() {
@@ -1688,6 +1722,8 @@ function ensureLoop() {
 
       updatePlayer(dt);
       updateTargeting();
+      updateWorldZones(); // <--- Ленивая прогрузка карты
+
       horrorTick(dt);
 
       if (crematorGroup && crematorGroup.fire && crematorGroup.fire.visible) {
@@ -1697,6 +1733,13 @@ function ensureLoop() {
           p.material.opacity = 0.7 + Math.sin(clock.elapsedTime * 12 + i) * 0.2;
         });
         if (crematorLight) crematorLight.intensity = 3 + Math.sin(clock.elapsedTime * 20) * 1;
+      }
+      if (scene.userData.fireGroup && scene.userData.fireGroup.visible) {
+        scene.userData.fireGroup.children.forEach((p, i) => {
+          p.scale.y = 0.8 + Math.sin(clock.elapsedTime * 8 + p.userData.phase) * 0.2;
+          p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime * 5 + p.userData.phase) * 0.1;
+          p.material.opacity = 0.7 + Math.sin(clock.elapsedTime * 12 + i) * 0.2;
+        });
       }
     }
 
@@ -1728,4 +1771,4 @@ window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 
 })();
 </script>
 </body>
-  </html>
+   </html>
